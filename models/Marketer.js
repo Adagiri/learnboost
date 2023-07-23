@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const UserSchema = new mongoose.Schema({
+const MarketerSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
@@ -27,26 +27,14 @@ const UserSchema = new mongoose.Schema({
     default: false,
   },
 
-  lastSubscription: {
+  referralCode: {
     type: String,
-    enum: ['none', '6 month', '1 year'],
-    default: 'none',
+    required: true,
   },
 
-  subscriptionStartDate: {
-    type: Date,
-  },
-
-  subscriptionEndDate: {
-    type: Date,
-  },
-
-  referralCode: String,
-
-  agreedToTerms: {
-    type: Boolean,
-    default: true,
-    select: false,
+  wallet: {
+    required: String,
+    default: 0,
   },
 
   accountActivationCode: String,
@@ -59,8 +47,8 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
-UserSchema.pre('remove', async function (next) {
+MarketerSchema.pre('remove', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Marketer', MarketerSchema);
