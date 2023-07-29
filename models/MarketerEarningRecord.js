@@ -19,17 +19,12 @@ const MarketerEarningRecordSchema = new mongoose.Schema({
     required: true,
   },
 
-  subscriptionAmount: {
-    type: Number,
-    required: true,
-  },
-
   earningPercentage: {
     type: Number,
     required: true,
   },
 
-  earningAmount: {
+  amountEarned: {
     type: Number,
     required: true,
   },

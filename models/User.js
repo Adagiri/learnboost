@@ -29,7 +29,7 @@ const UserSchema = new mongoose.Schema({
 
   lastSubscription: {
     type: String,
-    enum: ['none', '6 month', '1 year'],
+    enum: ['none', '6_months', '1_year'],
     default: 'none',
   },
 

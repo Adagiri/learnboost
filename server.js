@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const errorHandler = require('./middlewares/error');
 const auth = require('./routes/auth');
+const payments = require('./routes/payments');
 
 const swaggerDocument = require('./swagger.json');
 
@@ -42,6 +43,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Mount routers
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/payments', payments);
 
 app.use(errorHandler);
 

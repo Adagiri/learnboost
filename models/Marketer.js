@@ -32,7 +32,7 @@ const MarketerSchema = new mongoose.Schema({
     required: true,
   },
 
-  wallet: {
+  walletBalance: {
     required: String,
     default: 0,
   },
