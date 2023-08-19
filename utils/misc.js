@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 module.exports.randomNumbers = (length) => {
   let code = '';
   while (code.length < length) {
@@ -38,4 +40,11 @@ module.exports.getQueryArgs = (args) => {
   }
 
   return { filter, skip, limit, sort };
+};
+
+module.exports.createWebhookHash = (secretKey, payload) => {
+  return crypto
+    .createHmac('sha512', secretKey)
+    .update(JSON.stringify(payload))
+    .digest('hex');
 };

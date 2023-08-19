@@ -59,6 +59,8 @@ module.exports.getSignedJwtToken = function (user) {
     {
       id: user._id,
       email: user.email,
+      accountType: user.accountType,
+      role: user.role,
     },
     process.env.JWT_SECRET_KEY,
     {

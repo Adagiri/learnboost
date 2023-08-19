@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MarketerSchema = new mongoose.Schema({
+const AdminSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
@@ -8,7 +8,18 @@ const MarketerSchema = new mongoose.Schema({
 
   accountType: {
     type: String,
-    default: 'Marketer',
+    default: 'Admin',
+  },
+
+  role: {
+    type: String,
+    enum: ['Moderator', 'Master'],
+    default: 'Moderator',
+  },
+
+  phone: {
+    type: String,
+    trim: true,
   },
 
   email: {
@@ -26,25 +37,9 @@ const MarketerSchema = new mongoose.Schema({
     type: String,
     select: false,
   },
-
-  isAccountActivated: {
-    type: Boolean,
-    default: false,
-  },
-
-  referralCode: {
-    type: String,
-    required: true,
-  },
-
-  walletBalance: {
-    required: String,
-    default: 0,
-  },
-
-  accountActivationCode: String,
-  accountActivationToken: String,
-  accountActivationTokenExpiry: Date,
+  resetPasswordCode: String,
+  resetPasswordToken: String,
+  resetPasswordTokenExpiry: Date,
 
   createdAt: {
     type: Date,
@@ -52,8 +47,8 @@ const MarketerSchema = new mongoose.Schema({
   },
 });
 
-MarketerSchema.pre('remove', async function (next) {
+AdminSchema.pre('remove', async function (next) {
   next();
 });
 
-module.exports = mongoose.model('Marketer', MarketerSchema);
+module.exports = mongoose.model('Admin', AdminSchema);

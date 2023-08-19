@@ -6,6 +6,11 @@ const UserSchema = new mongoose.Schema({
     trim: true,
   },
 
+  accountType: {
+    type: String,
+    default: 'User',
+  },
+
   email: {
     type: String,
     required: [true, 'Please add an email'],
@@ -60,6 +65,7 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('remove', async function (next) {
+  
   next();
 });
 

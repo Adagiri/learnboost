@@ -10,6 +10,12 @@ const swaggerUi = require('swagger-ui-express');
 const errorHandler = require('./middlewares/error');
 const auth = require('./routes/auth');
 const payments = require('./routes/payments');
+const categories = require('./routes/categories');
+const series = require('./routes/series');
+const lessons = require('./routes/lessons');
+const subLessons = require('./routes/subLessons');
+const { createWebhookHash } = require('./utils/misc');
+const { handleWebhook } = require('./services/PaystackService');
 
 const swaggerDocument = require('./swagger.json');
 
@@ -39,11 +45,28 @@ app.get('/', (req, res) => {
   return res.send('Hello there!');
 });
 
+// Paystack transaction webhook
+app.post('/api/paystack/transaction-completion-webhook', function (req, res) {
+  // Generate hash
+  const hash = createWebhookHash(process.env.PAYSTACK_SECRET_KEY, req.body);
+
+  // Compare hash
+  if (hash == req.headers['x-paystack-signature']) {
+    handleWebhook(req.body, res);
+  } else {
+    res.status(403).send('Unauthorized');
+  }
+});
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Mount routers
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/payments', payments);
+app.use('/api/v1/categories', categories);
+app.use('/api/v1/series', series);
+app.use('/api/v1/lessons', lessons);
+app.use('/api/v1/subLessons', subLessons);
 
 app.use(errorHandler);
 
