@@ -32,8 +32,9 @@ module.exports.sendAccountActivationEmailForUser = async ({
   }
 };
 
-module.exports.sendAccountActivationEmailForCompany = async ({
+module.exports.sendAccountActivationEmailForMarketer = async ({
   email,
+  name,
   code,
 }) => {
   const message = `<!DOCTYPE html>
@@ -45,7 +46,7 @@ module.exports.sendAccountActivationEmailForCompany = async ({
     <title>Moniedrop</title>
 </head>
 <body>
-    <p>Hi, please use the code below to activate your account.</p>
+    <p>Hi ${name}, please use the code below to activate your account.</p>
     <p>${code}</p>
 </body>
 </html>`;

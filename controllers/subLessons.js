@@ -18,7 +18,7 @@ const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
 };
 
 module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
-  let subLessons = await SubLesson.find().select('-_id -__v');
+  let subLessons = await SubLesson.find();
 
   const subLessonProgresses = await SubLessonProgress.find({
     user: req.user.id,

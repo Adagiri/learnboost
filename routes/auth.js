@@ -8,8 +8,21 @@ const {
   login,
   deleteAccount,
   resetPassword,
+  loginAdmin,
+  registerAdmin,
+  loginMarketer,
+  registerMarketer,
+  verifyEmailMarketer,
 } = require('../controllers/auth');
 const router = express.Router();
+
+router.post('/admin/login', loginAdmin);
+router.post('/admin/register', registerAdmin);
+
+router.post('/marketer/login', loginMarketer);
+router.post('/marketer/register', registerMarketer);
+router.post('/marketer/verify-email', verifyEmailMarketer);
+
 
 router.post('/register', register);
 router.post('/verify-email', verifyEmail);

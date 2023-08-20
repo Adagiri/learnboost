@@ -16,7 +16,7 @@ const deriveLessonProgress = (lessonId, lessonsProgresses) => {
 };
 
 module.exports.getLessons = asyncHandler(async (req, res, next) => {
-  let lessons = await Lesson.find().select('-_id -__v');
+  let lessons = await Lesson.find();
 
   const lessonsProgresses = await LessonProgress.find({ user: req.user.id });
 

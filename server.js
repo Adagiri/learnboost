@@ -1,9 +1,9 @@
 const http = require('http');
-const path = require('path');
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
+const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
@@ -14,6 +14,9 @@ const categories = require('./routes/categories');
 const series = require('./routes/series');
 const lessons = require('./routes/lessons');
 const subLessons = require('./routes/subLessons');
+const users = require('./routes/users');
+const marketers = require('./routes/marketers');
+const admins = require('./routes/admins');
 const { createWebhookHash } = require('./utils/misc');
 const { handleWebhook } = require('./services/PaystackService');
 
@@ -27,12 +30,23 @@ connectDB();
 
 const app = express();
 
-if (process.env.TEST_ENV) {
-  app.use(cors());
+let origin = ['https://marketer.learnboost.ng'];
+if (process.env.TEST_ENV === 'true') {
+  origin.push('http://localhost:3000');
 }
 
+app.use(
+  cors({ origin: origin, credentials: true, exposedHeaders: ['X-Total-Count'] })
+);
 app.use(cookieParser());
-
+app.use(
+  helmet({
+    contentSecurityPolicy:
+      process.env.NODE_ENV === 'production' && process.env.TEST_ENV === 'false'
+        ? true
+        : false,
+  })
+);
 app.use(express.json());
 
 if (process.env.NODE_ENV === 'development') {
@@ -67,6 +81,9 @@ app.use('/api/v1/categories', categories);
 app.use('/api/v1/series', series);
 app.use('/api/v1/lessons', lessons);
 app.use('/api/v1/subLessons', subLessons);
+app.use('/api/v1/users', users);
+app.use('/api/v1/marketers', marketers);
+app.use('/api/v1/admins', admins);
 
 app.use(errorHandler);
 

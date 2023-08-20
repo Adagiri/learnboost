@@ -5,10 +5,9 @@ const User = require('../models/User');
 const {
   sendAccountActivationEmailForUser,
   sendWelcomeEmailForUser,
-  sendAccountActivationEmailForCompany,
-  sendWelcomeEmailForCompany,
   sendResetPasswordEmailForCompany,
   sendResetPasswordEmailForUser,
+  sendAccountActivationEmailForMarketer,
 } = require('../utils/messages');
 
 const {
@@ -18,7 +17,10 @@ const {
   getEncryptedToken,
   confirmPassword,
   generateEncryptedPassword,
+  generateRandomString,
 } = require('../utils/general');
+const Admin = require('../models/Admin');
+const Marketer = require('../models/Marketer');
 
 module.exports.register = asyncHandler(async (req, res, next) => {
   const args = req.body;
@@ -297,4 +299,173 @@ module.exports.deleteAccount = asyncHandler(async (req, res, next) => {
       user: user,
     });
   }
+});
+
+module.exports.registerAdmin = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+
+  const existingAccount = await Admin.findOne({
+    email: args.email,
+  });
+
+  if (existingAccount) {
+    return next(new ErrorResponse(400, 'Email already taken'));
+  }
+
+  args.password = await generateEncryptedPassword(args.password);
+
+  await Admin.create(args);
+
+  return res.status(200).json({
+    success: true,
+  });
+});
+
+module.exports.loginAdmin = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+
+  let admin = await Admin.findOne({
+    email: args.email,
+  }).select('+password');
+
+  if (!admin) {
+    return next(new ErrorResponse(400, 'Invalid credentials'));
+  }
+
+  const isPasswordMatch = await confirmPassword(admin.password, args.password);
+
+  if (!isPasswordMatch) {
+    return next(new ErrorResponse(400, 'Invalid credentials'));
+  }
+
+  const token = getSignedJwtToken(admin);
+
+  const options = {
+    // Expires in 24 hours
+    expires: new Date(Date.now() + 3600 * 24 * 1000),
+    httpOnly: true,
+    secure: true,
+    path: '/',
+  };
+
+  admin = admin.toObject();
+  delete admin.password;
+
+  res.cookie('token', token, options);
+
+  return res.status(200).json({
+    success: true,
+    token: token,
+    user: admin,
+  });
+});
+
+module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+  const { name, email } = args;
+
+  const existingAccount = await Marketer.findOne({
+    email: email,
+    isAccountActivated: true,
+  });
+
+  if (existingAccount) {
+    return next(new ErrorResponse(400, 'Email already taken'));
+  }
+
+  const { token, encryptedToken, tokenExpiry, code } = generateVerificationCode(
+    20,
+    10
+  );
+
+  args.password = await generateEncryptedPassword(args.password);
+  args.accountActivationCode = code;
+  args.accountActivationToken = encryptedToken;
+  args.accountActivationTokenExpiry = tokenExpiry;
+  args.referralCode = generateRandomString(7);
+
+  await Marketer.create(args);
+
+  await sendAccountActivationEmailForMarketer({ email, name, code });
+
+  return res.status(200).json({
+    success: true,
+    token,
+  });
+});
+
+module.exports.verifyEmailMarketer = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+
+  const encryptedToken = getEncryptedToken(args.token);
+
+  const marketer = await Marketer.findOne({
+    accountActivationToken: encryptedToken,
+    isAccountActivated: false,
+  });
+
+  if (!marketer) {
+    return next(new ErrorResponse(404, 'Invalid token'));
+  }
+
+  if (new Date(marketer.accountActivationTokenExpiry) < new Date()) {
+    marketer.accountActivationToken = undefined;
+    marketer.accountActivationCode = undefined;
+    marketer.accountActivationTokenExpiry = undefined;
+    await marketer.save();
+    return next(new ErrorResponse(400, 'Registration session expired'));
+  }
+
+  if (marketer.accountActivationCode !== args.code) {
+    return next(new ErrorResponse(400, 'Incorrect code'));
+  }
+
+  marketer.isAccountActivated = true;
+  marketer.accountActivationToken = undefined;
+  marketer.accountActivationCode = undefined;
+  marketer.accountActivationTokenExpiry = undefined;
+  await marketer.save();
+
+  const { email, name } = marketer;
+
+  await sendWelcomeEmailForUser({ email, name });
+  const authToken = getSignedJwtToken(marketer);
+
+  res.status(200).json({
+    success: true,
+    authToken: authToken,
+    marketer: marketer,
+  });
+});
+
+module.exports.loginMarketer = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+
+  let marketer = await Marketer.findOne({
+    email: args.email,
+    isAccountActivated: true,
+  }).select('+password');
+
+  if (!marketer) {
+    return next(new ErrorResponse(400, 'Invalid credentials'));
+  }
+
+  const isPasswordMatch = await confirmPassword(
+    marketer.password,
+    args.password
+  );
+
+  if (!isPasswordMatch) {
+    return next(new ErrorResponse(400, 'Invalid credentials'));
+  }
+
+  const authToken = getSignedJwtToken(marketer);
+
+  marketer = marketer.toObject();
+  delete marketer.password;
+  return res.status(200).json({
+    success: true,
+    authToken: authToken,
+    marketer: marketer,
+  });
 });

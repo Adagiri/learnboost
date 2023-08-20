@@ -2,7 +2,7 @@ const asyncHandler = require('../middlewares/async');
 const Category = require('../models/Category');
 
 module.exports.getCategories = asyncHandler(async (req, res, next) => {
-  let categories = await Category.find().select('-_id -__v');
+  let categories = await Category.find();
 
   res.header('X-Total-Count', categories.length);
   res.status(200).json(categories);

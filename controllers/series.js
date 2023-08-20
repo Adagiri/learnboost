@@ -3,7 +3,7 @@ const Category = require('../models/Category');
 const Series = require('../models/Series');
 
 module.exports.getSeries = asyncHandler(async (req, res, next) => {
-  let series = await Series.find().select('-_id -__v');
+  let series = await Series.find();
 
   res.header('X-Total-Count', series.length);
   res.status(200).json(series);
