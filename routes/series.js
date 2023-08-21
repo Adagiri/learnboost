@@ -5,6 +5,7 @@ const {
   addSeries,
   getSeriesById,
   editSeries,
+  deleteSeries,
 } = require('../controllers/series.js');
 const { protect, authorize, protectAdmin } = require('../middlewares/auth.js');
 const router = express.Router();
@@ -17,6 +18,7 @@ router
 router
   .route('/:seriesId')
   .get(protect, getSeriesById)
-  .put(protectAdmin, authorize('Master', 'Moderator'), editSeries);
+  .put(protectAdmin, authorize('Master', 'Moderator'), editSeries)
+  .delete(protectAdmin, authorize('Master', 'Moderator'), deleteSeries);
 
 module.exports = router;

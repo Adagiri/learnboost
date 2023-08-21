@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 
 const getS3SignedUrl = (key, contentType) => {
   var params = {
-    Bucket: process.env.AWS_FILEUPLOAD_BUCKET,
+    Bucket: process.env.S3_FILEUPLOAD_BUCKET,
     Key: key,
     ContentType: contentType,
   };

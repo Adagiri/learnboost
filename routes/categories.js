@@ -12,11 +12,11 @@ const router = express.Router();
 router
   .route('/')
   .get(getCategories)
-  .post(protectAdmin, authorize('Master', 'Moderator'), addCategory);
+  // .post(protectAdmin, authorize('Master', 'Moderator'), addCategory);
 
 router
   .route('/:categoryId')
   .get(protect, getCategory)
-  .put(protectAdmin, authorize('Master', 'Moderator'), editCategory);
+  // .put(protectAdmin, authorize('Master', 'Moderator'), editCategory);
 
 module.exports = router;

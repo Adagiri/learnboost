@@ -24,13 +24,38 @@ module.exports.generateRandomString = (length) => {
   }
 
   return result;
-}
+};
+
+const getLimit = (_start, _end) => {
+  const start = Math.abs(parseInt(_start, 10)) || 0;
+  const end = Math.abs(parseInt(_end, 10)) || 10;
+
+  if (start === 0) {
+    return end;
+  } else {
+    return end - start - 1;
+  }
+};
+
+const getSkip = (start) => {
+  const skip = Math.abs(parseInt(start, 10)) || 0;
+
+  if (skip === 0) {
+    return 0;
+  } else {
+    return skip - 1;
+  }
+};
 
 module.exports.getQueryArgs = (args) => {
-  const filter = args.filter || {};
+  const filter = args || {};
+  console.log(filter, 'filter-1');
   // Transform the query if the property 'id' was added
   if (filter.id) {
-    filter._id = mongoose.Types.ObjectId(filter.id);
+    console.log(typeof filter.id);
+    filter._id = Array.isArray(filter.id)
+      ? filter.id.map((_id) => mongoose.Types.ObjectId(_id))
+      : mongoose.Types.ObjectId(filter.id);
 
     delete filter.id;
   }
@@ -44,17 +69,22 @@ module.exports.getQueryArgs = (args) => {
   filter.deleted = { $ne: true };
 
   // Set pagination fields
-  const page = parseInt(args.page, 10) || 0;
-  const limit = parseInt(args.perPage, 10) || 10;
-  const skip = page * limit;
+  const limit = getLimit(args._start, args._end);
+  const skip = getSkip(args._start);
 
   // Transform sort field
   const sort = {};
-  if (args.sortField) {
-    sort[args.sortField] = args.sortOrder === 'ASC' ? 1 : -1;
+  if (args._sort) {
+    if (args._sort === 'id') {
+      sort['_id'] = args._order === 'ASC' ? 1 : -1;
+    } else {
+      sort[args._sort] = args._order === 'ASC' ? 1 : -1;
+    }
   } else {
     sort.createdAt = -1;
   }
+
+  console.log(filter, 'filter');
 
   return { filter, skip, limit, sort };
 };

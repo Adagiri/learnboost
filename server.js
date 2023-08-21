@@ -17,6 +17,7 @@ const subLessons = require('./routes/subLessons');
 const users = require('./routes/users');
 const marketers = require('./routes/marketers');
 const admins = require('./routes/admins');
+const misc = require('./routes/misc');
 const { createWebhookHash } = require('./utils/misc');
 const { handleWebhook } = require('./services/PaystackService');
 
@@ -84,6 +85,7 @@ app.use('/api/v1/subLessons', subLessons);
 app.use('/api/v1/users', users);
 app.use('/api/v1/marketers', marketers);
 app.use('/api/v1/admins', admins);
+app.use('/api/v1/misc', misc);
 
 app.use(errorHandler);
 

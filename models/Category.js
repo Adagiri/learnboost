@@ -17,8 +17,4 @@ const CategorySchema = new mongoose.Schema({
   },
 });
 
-CategorySchema.pre('remove', async function (next) {
-  next();
-});
-
 module.exports = mongoose.model('Category', CategorySchema);

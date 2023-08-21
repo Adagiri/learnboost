@@ -29,6 +29,7 @@ const SeriesSchema = new mongoose.Schema({
 });
 
 SeriesSchema.pre('remove', async function (next) {
+  await this.model('Lesson').deleteMany({ series: this._id });
   next();
 });
 

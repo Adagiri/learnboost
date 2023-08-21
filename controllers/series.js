@@ -1,36 +1,59 @@
 const asyncHandler = require('../middlewares/async');
 const Category = require('../models/Category');
 const Series = require('../models/Series');
+const { getQueryArgs } = require('../utils/general');
 
 module.exports.getSeries = asyncHandler(async (req, res, next) => {
-  let series = await Series.find();
+  const { filter, sort, skip, limit } = getQueryArgs(req.query);
 
-  res.header('X-Total-Count', series.length);
-  res.status(200).json(series);
+  let series = await Series.find(filter).sort(sort).skip(skip).limit(limit);
+  const seriesCount = await Series.countDocuments();
+
+  series = series.map((series) => {
+    series = series.toObject();
+    series.id = series._id;
+    return series;
+  });
+
+  res.header('X-Total-Count', seriesCount);
+  return res.status(200).json(series);
 });
 
 module.exports.getSeriesById = asyncHandler(async (req, res, next) => {
   let series = await Series.findById(req.params.seriesId);
 
+  series = series.toObject();
   series.id = series._id;
-  res.status(200).json(series);
+  return res.status(200).json(series);
 });
 
 module.exports.addSeries = asyncHandler(async (req, res, next) => {
-  const series = await Series.create(req.body);
+  let series = await Series.create(req.body);
 
   await Category.findByIdAndUpdate(req.body.category, {
     $inc: { seriesCount: 1 },
   });
 
+  series = series.toObject();
   series.id = series._id;
   res.status(200).json(series);
 });
 
 module.exports.editSeries = asyncHandler(async (req, res, next) => {
-  const series = await Series.findByIdAndUpdate(req.params.seriesId, req.body);
+  let series = await Series.findByIdAndUpdate(req.params.seriesId, req.body);
 
+  series = series.toObject();
   series.id = series._id;
+
+  res.status(200).json(series);
+});
+
+module.exports.deleteSeries = asyncHandler(async (req, res, next) => {
+  let series = await Series.findById(req.params.seriesId);
+
+  if (series) {
+    await series.remove();
+  }
 
   res.status(200).json(series);
 });
