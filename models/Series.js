@@ -30,6 +30,9 @@ const SeriesSchema = new mongoose.Schema({
 
 SeriesSchema.pre('remove', async function (next) {
   await this.model('Lesson').deleteMany({ series: this._id });
+  await this.model('Category').findByIdAndUpdate(this.category, {
+    $inc: { seriesCount: -1 },
+  });
   next();
 });
 

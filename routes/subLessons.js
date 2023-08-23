@@ -23,12 +23,12 @@ router
   .post(protectAdmin, authorize('Master', 'Moderator'), addSubLesson);
 
 router
-  .route('/progress/:lessonId')
+  .route('/progress/:subLessonId')
   .get(protectUser, getSubLessonProgress)
   .put(protectUser, updateSubLessonProgress);
 
 router
-  .route('/:lessonId')
+  .route('/:subLessonId')
   .get(protect, getSubLesson)
   .put(protectAdmin, authorize('Master', 'Moderator'), editSubLesson)
   .delete(protectAdmin, authorize('Master', 'Moderator'), deleteSubLesson);

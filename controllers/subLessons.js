@@ -20,6 +20,8 @@ const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
 module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
   let subLessons = await SubLesson.find();
 
+  console.log(subLessons, 'sublessons');
+
   const subLessonProgresses = await SubLessonProgress.find({
     user: req.user.id,
   });
@@ -42,39 +44,55 @@ module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
 module.exports.getSubLesson = asyncHandler(async (req, res, next) => {
   let subLesson = await SubLesson.findById(req.params.subLessonId);
 
+  subLesson = subLesson.toObject();
   subLesson.id = subLesson._id;
   res.status(200).json(subLesson);
 });
 
 module.exports.addSubLesson = asyncHandler(async (req, res, next) => {
-  const subLesson = await SubLesson.create(req.body);
+  let subLesson = await SubLesson.create(req.body);
 
   await Lesson.findByIdAndUpdate(req.body.lesson, {
-    $inc: { subLessonsCount: 1 },
+    $inc: {
+      totalDuration: req.body.duration,
+      totalSize: req.body.size,
+      subLessonsCount: 1,
+    },
   });
 
+  subLesson = subLesson.toObject();
   subLesson.id = subLesson._id;
   res.status(200).json(subLesson);
 });
 
 module.exports.editSubLesson = asyncHandler(async (req, res, next) => {
-  const subLesson = await SubLesson.findByIdAndUpdate(
-    req.params.subLessonId,
-    req.body
-  );
+  console.log(req.body);
+  const subLessonId = req.params.subLessonId;
+  let subLessonBeforeEdit = await SubLesson.findById(subLessonId);
 
+  let subLesson = await SubLesson.findByIdAndUpdate(subLessonId, req.body);
+
+  const durationDifference = req.body.duration - subLessonBeforeEdit.duration;
+  const sizeDifference = req.body.size - subLessonBeforeEdit.size;
+
+  await Lesson.findByIdAndUpdate(req.body.lesson, {
+    $inc: { totalDuration: durationDifference, totalSize: sizeDifference },
+  });
+
+  subLesson = subLesson.toObject();
   subLesson.id = subLesson._id;
 
-  res.status(200).json(subLesson);
+  return res.status(200).json(subLesson);
 });
 
 module.exports.deleteSubLesson = asyncHandler(async (req, res, next) => {
-  const subLesson = await SubLesson.findByIdAndDelete(req.params.subLessonId);
+  let subLesson = await SubLesson.findByIdAndDelete(req.params.subLessonId);
 
   if (subLesson) {
     await subLesson.remove();
   }
 
+  subLesson = subLesson.toObject();
   subLesson.id = subLesson._id;
 
   return res.status(200).json(subLesson);

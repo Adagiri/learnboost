@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const LessonSchema = new mongoose.Schema({
+  category: {
+    type: mongoose.ObjectId,
+    ref: 'Category',
+    required: true,
+  },
+
   series: {
     type: mongoose.ObjectId,
     ref: 'Series',
@@ -17,7 +23,12 @@ const LessonSchema = new mongoose.Schema({
     required: true,
   },
 
-  totalVideoTime: {
+  totalDuration: {
+    type: Number,
+    default: 0,
+  },
+
+  totalSize: {
     type: Number,
     default: 0,
   },
@@ -27,9 +38,9 @@ const LessonSchema = new mongoose.Schema({
     default: 0,
   },
 
-  level: {
+  difficulty: {
     type: String,
-    enum: ['Early', 'Medium', 'High'],
+    enum: ['Easy', 'Medium', 'Hard'],
     required: true,
   },
 
@@ -40,6 +51,10 @@ const LessonSchema = new mongoose.Schema({
 });
 
 LessonSchema.pre('remove', async function (next) {
+  await this.model('SubLesson').deleteMany({ lesson: this._id });
+  await this.model('Series').findByIdAndUpdate(this.series, {
+    $inc: { lessonsCount: -1 },
+  });
   next();
 });
 // progress

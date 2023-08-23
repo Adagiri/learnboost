@@ -81,7 +81,7 @@ app.use('/api/v1/payments', payments);
 app.use('/api/v1/categories', categories);
 app.use('/api/v1/series', series);
 app.use('/api/v1/lessons', lessons);
-app.use('/api/v1/subLessons', subLessons);
+app.use('/api/v1/sub-lessons', subLessons);
 app.use('/api/v1/users', users);
 app.use('/api/v1/marketers', marketers);
 app.use('/api/v1/admins', admins);

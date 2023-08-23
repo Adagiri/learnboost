@@ -6,6 +6,7 @@ const {
   getLesson,
   editLesson,
   getLessonProgress,
+  deleteLesson,
 } = require('../controllers/lessons.js');
 const {
   protect,
@@ -25,6 +26,7 @@ router.route('/progress/:lessonId').get(protectUser, getLessonProgress);
 router
   .route('/:lessonId')
   .get(protect, getLesson)
-  .put(protectAdmin, authorize('Master', 'Moderator'), editLesson);
+  .put(protectAdmin, authorize('Master', 'Moderator'), editLesson)
+  .delete(protectAdmin, authorize('Master', 'Moderator'), deleteLesson);
 
 module.exports = router;

@@ -81,3 +81,13 @@ module.exports.getLessonProgress = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json(resp);
 });
+
+module.exports.deleteLesson = asyncHandler(async (req, res, next) => {
+  let lesson = await Lesson.findById(req.params.lessonId);
+
+  if (lesson) {
+    await lesson.remove();
+  }
+
+ return res.status(200).json(lesson);
+});

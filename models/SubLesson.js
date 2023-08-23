@@ -1,9 +1,21 @@
 const mongoose = require('mongoose');
 
 const SubLessonSchema = new mongoose.Schema({
+  category: {
+    type: mongoose.ObjectId,
+    ref: 'Category',
+    required: true,
+  },
+
+  series: {
+    type: mongoose.ObjectId,
+    ref: 'Series',
+    required: true,
+  },
+
   lesson: {
     type: mongoose.ObjectId,
-    ref: 'SubLesson',
+    ref: 'Lesson',
     required: true,
   },
 
@@ -12,7 +24,12 @@ const SubLessonSchema = new mongoose.Schema({
     required: true,
   },
 
-  src: {
+  video: {
+    type: String,
+    required: true,
+  },
+
+  videoType: {
     type: String,
     required: true,
   },
@@ -21,7 +38,12 @@ const SubLessonSchema = new mongoose.Schema({
     type: String,
   },
 
-  videoTime: {
+  duration: {
+    type: Number,
+    default: 0,
+  },
+
+  size: {
     type: Number,
     default: 0,
   },
@@ -40,6 +62,13 @@ const SubLessonSchema = new mongoose.Schema({
 
 SubLessonSchema.pre('remove', async function (next) {
   await this.model('SubLessonProgress').deleteMany({ subLesson: this._id });
+  await this.model('Lesson').findByIdAndUpdate(this.lesson, {
+    $inc: {
+      subLessonsCount: -1,
+      totalDuration: -this.duration,
+      totalSize: -this.size,
+    },
+  });
   next();
 });
 // progress
