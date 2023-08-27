@@ -31,7 +31,11 @@ connectDB();
 
 const app = express();
 
-let origin = ['https://marketer.learnboost.ng'];
+let origin = [
+  'https://marketer.learnboost.com.ng',
+  'https://learnboost.cloudhacks.net',
+  'https://admin.learnboost.com.ng',
+];
 if (process.env.TEST_ENV === 'true') {
   origin.push('http://localhost:3000');
 }
