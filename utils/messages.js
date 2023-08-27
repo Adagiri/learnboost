@@ -11,7 +11,7 @@ module.exports.sendAccountActivationEmailForUser = async ({
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi ${name}, please use the code below to activate your account.</p>
@@ -43,7 +43,7 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi ${name}, please use the code below to activate your account.</p>
@@ -71,7 +71,7 @@ module.exports.sendResetPasswordEmailForUser = async (email, code) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi, please use the code below to reset your password. However, if you did not initiate a reset password request, please ignore this mail</p>
@@ -100,7 +100,7 @@ module.exports.sendResetPasswordEmailForCompany = async (email, code) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi, please use the code below to reset your password. However, if you did not initiate a reset password request, please ignore this mail</p>
@@ -129,7 +129,7 @@ module.exports.sendWelcomeEmailForUser = async ({ name, email }) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi ${name}, welcome to Learn Smart</p>
@@ -151,7 +151,7 @@ module.exports.sendWelcomeEmailForCompany = async ({ email }) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moniedrop</title>
+    <title>Learn Boost</title>
 </head>
 <body>
     <p>Hi, welcome to Learn Smart</p>
@@ -160,6 +160,33 @@ module.exports.sendWelcomeEmailForCompany = async ({ email }) => {
 
   try {
     const emailArgs = generateEmailArguments(null, email, 'Welcome', message);
+    await sendEmail(emailArgs);
+  } catch (error) {
+    console.log(error, 'error whilst sending welcome message to user');
+  }
+};
+
+module.exports.sendWebhookErrorToDeveloper = async ({ subject, error }) => {
+  const message = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn Boost</title>
+</head>
+<body>
+    <p>${error}</p>
+</body>
+</html>`;
+
+  try {
+    const emailArgs = generateEmailArguments(
+      null,
+      'learnsmart023@gmail.com',
+      subject,
+      message
+    );
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error, 'error whilst sending welcome message to user');

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MarketerEarningRecordSchema = new mongoose.Schema({
+const MarketingEarningsRecordSchema = new mongoose.Schema({
   user: {
     type: mongoose.Types.ObjectId,
     ref: 'User',
@@ -36,6 +36,6 @@ const MarketerEarningRecordSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model(
-  'MarketerEarningRecord',
-  MarketerEarningRecordSchema
+  'MarketingEarningsRecord',
+  MarketingEarningsRecordSchema
 );

@@ -1,5 +1,10 @@
 const axios = require('axios');
 const { randomNumbers } = require('../utils/misc');
+const {
+  processSubscriptionTransactionWebhook,
+} = require('../controllers/webhooks');
+const { sendWebhookErrorToDeveloper } = require('../utils/messages');
+const WebhookError = require('../models/WebhookError');
 
 module.exports.initialiseTransaction = async (
   amount,
@@ -29,8 +34,11 @@ module.exports.initialiseTransaction = async (
   });
 };
 
-module.exports.handleWebhook = async (payload, res) => {
+module.exports.handleWebhook = async (payload) => {
   let { event, data } = payload;
+
+  console.log(event, 'event');
+  // console.log(data, 'data');
 
   let transactionType = 'disburse';
 
@@ -38,163 +46,41 @@ module.exports.handleWebhook = async (payload, res) => {
     transactionType = 'card';
   }
 
-  const { amount, reference } = data;
-
   // Convert from kobo to naira (Amount from paystack is in -kobo-)
-  const amountInNaira = Number(amount) / 100;
+  const transactionAmount = Number(data.amount) / 100;
 
   // Successful paystack transaction (card or transfer)
   if (event === 'charge.success') {
-    const metadata = data.metadata;
-    const description = metadata?.description;
-    const authorization = data.authorization;
-    const customer = { email: data.customer.email };
-    const paymentReference = reference;
-    const transactionReference = reference;
-    const paymentHandler = 'Paystack';
-    const cardDetails = {
-      token: authorization.authorization_code,
-      cardType: authorization.card_type || authorization.brand,
-      last4: authorization.last4,
-      expMonth: authorization.exp_month,
-      expYear: authorization.exp_year.slice(2), // It is sliced in order to convert it from the format '2022' to '22'
-      bankName: authorization.bank,
-      accountName: authorization.account_name,
-      maskedPan: authorization.bin + '******' + authorization.last4,
-      reusable: authorization.reusable,
-      handler: 'Paystack',
-      email: customer.email,
-    };
+    try {
+      await processSubscriptionTransactionWebhook({
+        metadata: data.metadata,
+        channel: data.channel,
+        reference: data.reference,
+        transactionAmount: transactionAmount,
+        authorization: data.authorization,
+      });
+    } catch (error) {
+      const subject =
+        'Error During Processing of Successful Subscription Transaction';
 
-    // Add saving - new card
-    if (description === 'Fund_Saving_Via_Card') {
-      await webhookAddSavingViaNewCard(
-        {
-          metadata,
-          cardDetails,
-          description,
-          customer,
-          amount: amountInNaira,
-          paymentProviderCharge,
-          paymentReference,
-          transactionReference,
-          paymentHandler,
-        },
-        res
-      );
+      // Save error to DB
+      await WebhookError.create({
+        subject: subject,
+        error: error,
+        type: 'SubscriptionTransaction',
+        reference: data.reference,
+      });
+
+      // Send email to developers
+      await sendWebhookErrorToDeveloper({
+        subject: subject,
+        error: error,
+      });
+
+      throw error;
     }
-
-    // Topup saving through card - Automated saving. This webhook runs after a successful charge is done on a users' card
-    if (description === 'Topup_Saving_Via_Card') {
-      await webhookTopupSavingViaCardAutodebit(
-        {
-          metadata,
-          cardDetails,
-          description,
-          customer,
-          amount: amountInNaira,
-          paymentProviderCharge,
-          paymentReference,
-          transactionReference,
-          paymentHandler,
-        },
-        res
-      );
-    }
-
-    if (description === 'Fund_Saving_Via_Saved_Card') {
-      // This webhook event is associated with using a saved card for making payments and all required change to the application has already been handled before response is sent back to the client. Hence, we respond to the webhook event with 200 status without carrying out any further action here.
-      res.sendStatus(200);
-    }
-
-    if (description === 'Add_New_Card') {
-      // Add card
-      await webhookAddCard(
-        {
-          metadata,
-          cardDetails,
-          description,
-          customer,
-          amount: amountInNaira,
-          paymentProviderCharge,
-          paymentReference,
-          transactionReference,
-          paymentHandler,
-        },
-        res
-      );
-    }
-  }
-
-  if (event === 'charge.dispute.create') {
-    const transactionId = data.id;
-    const status = data.status;
-    const amount = data.transaction.amount;
-    const reference = data.transaction.reference;
-    const refund_amount = data.refund_amount;
-    const paymentHandler = 'Paystack';
-
-    // Save the dispute & Send email alert
-    webhookDisputeCreated(
-      {
-        transactionId,
-        status,
-        amount,
-        reference,
-        refund_amount,
-        paymentHandler,
-      },
-      res
-    );
-  }
-
-  if (event === 'charge.dispute.remind') {
-    // You have not sorted out a complaint laid on your bussiness, Do something
-    const transactionId = data.id;
-    const status = data.status;
-    const amount = data.transaction.amount;
-    const reference = data.transaction.reference;
-    const refund_amount = data.refund_amount;
-    const paymentHandler = 'Paystack';
-
-    // Save the dispute & Send email alert
-    webhookDisputeRemind(
-      {
-        transactionId,
-        status,
-        amount,
-        reference,
-        refund_amount,
-        paymentHandler,
-      },
-      res
-    );
-  }
-
-  if (event === 'charge.dispute.resolve') {
-    // Complaint has been sorted out
-    const transactionId = data.id;
-    const status = data.status;
-    const amount = data.transaction.amount;
-    const reference = data.transaction.reference;
-    const refund_amount = data.refund_amount;
-    const paymentHandler = 'Paystack';
-
-    // Save the dispute & Send email alert
-    webhookDisputeResolve(
-      {
-        transactionId,
-        status,
-        amount,
-        reference,
-        refund_amount,
-        paymentHandler,
-      },
-      res
-    );
   }
 };
-
 
 // FOR DISBURSEMENTS
 // transfer.failed;
@@ -207,6 +93,6 @@ module.exports.handleWebhook = async (payload, res) => {
 // FOR BANK TRANSFER
 
 // POSSIBLE DISPUTES
-// charge.dispute.create	
+// charge.dispute.create
 // charge.dispute.remind
 // charge.dispute.resolve

@@ -61,17 +61,31 @@ app.get('/', (req, res) => {
 });
 
 // Paystack transaction webhook
-app.post('/api/paystack/transaction-completion-webhook', function (req, res) {
-  // Generate hash
-  const hash = createWebhookHash(process.env.PAYSTACK_SECRET_KEY, req.body);
+app.post(
+  '/api/paystack/transaction-completion-webhook',
+  async function (req, res) {
+    // Generate hash
+    const hash = createWebhookHash(process.env.PAYSTACK_SECRET_KEY, req.body);
 
-  // Compare hash
-  if (hash == req.headers['x-paystack-signature']) {
-    handleWebhook(req.body, res);
-  } else {
-    res.status(403).send('Unauthorized');
+    // Compare hash
+    if (hash == req.headers['x-paystack-signature']) {
+      try {
+        await handleWebhook(req.body);
+
+        return res.sendStatus(200);
+      } catch (error) {
+        console.log(
+          error,
+          'error whilst processing paystack transactions webhook'
+        );
+
+        return res.sendStatus(500);
+      }
+    } else {
+      return res.status(403).send('Unauthorized');
+    }
   }
-});
+);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

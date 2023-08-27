@@ -32,19 +32,14 @@ const UserSchema = new mongoose.Schema({
     default: false,
   },
 
-  lastSubscription: {
+  latestSubscriptionType: {
     type: String,
     enum: ['none', '6_months', '1_year'],
     default: 'none',
   },
 
-  subscriptionStartDate: {
-    type: Date,
-  },
-
-  subscriptionEndDate: {
-    type: Date,
-  },
+  subscriptionStartDate: Date,
+  subscriptionEndDate: Date,
 
   referralCode: String,
 

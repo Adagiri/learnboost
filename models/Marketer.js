@@ -4,7 +4,7 @@ const MarketerSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
-    required: true
+    required: true,
   },
 
   accountType: {
@@ -39,7 +39,7 @@ const MarketerSchema = new mongoose.Schema({
   },
 
   walletBalance: {
-    required: String,
+    type: Number,
     default: 0,
   },
 

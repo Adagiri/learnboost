@@ -18,14 +18,15 @@ const SubscriptionTransactionSchema = new mongoose.Schema({
     default: 'Paystack',
   },
 
-  paymentHandlerReference: {
-    type: String,
-    required: true,
-  },
-
   paymentMethod: {
     type: String,
     enum: ['Card', 'Transfer'],
+  },
+
+  bankAccountDetails: {
+    bankName: String,
+    accountName: String,
+    accountNumber: String,
   },
 
   transactionDate: {
