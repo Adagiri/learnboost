@@ -4,7 +4,6 @@ const { getQueryArgs } = require('../utils/general');
 
 module.exports.getCategories = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
-  console.log(filter);
   let categories = await Category.find(filter)
     .sort(sort)
     .skip(skip)

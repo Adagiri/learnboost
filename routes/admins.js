@@ -16,7 +16,7 @@ router
 
 router
   .route('/:adminId')
-  .get(protect, getAdmin)
+  .get(protectAdmin, getAdmin)
   .put(protectAdmin, authorize('Master'), editAdmin);
 
 module.exports = router;

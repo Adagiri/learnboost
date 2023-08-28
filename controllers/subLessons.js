@@ -3,6 +3,7 @@ const Lesson = require('../models/Lesson');
 const LessonProgress = require('../models/LessonProgress');
 const SubLesson = require('../models/SubLesson');
 const SubLessonProgress = require('../models/SubLessonProgress');
+const { getQueryArgs } = require('../utils/general');
 
 const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
   const doc = subLessonsProgresses.find(
@@ -18,9 +19,11 @@ const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
 };
 
 module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
-  let subLessons = await SubLesson.find();
-
-  console.log(subLessons, 'sublessons');
+  const { filter, sort, skip, limit } = getQueryArgs(req.query);
+  let subLessons = await SubLesson.find(filter)
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
 
   const subLessonProgresses = await SubLessonProgress.find({
     user: req.user.id,

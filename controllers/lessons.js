@@ -2,6 +2,7 @@ const asyncHandler = require('../middlewares/async');
 const Lesson = require('../models/Lesson');
 const Series = require('../models/Series');
 const LessonProgress = require('../models/SubLessonProgress');
+const { getQueryArgs } = require('../utils/general');
 
 const deriveLessonProgress = (lessonId, lessonsProgresses) => {
   const doc = lessonsProgresses.find(
@@ -16,7 +17,9 @@ const deriveLessonProgress = (lessonId, lessonsProgresses) => {
 };
 
 module.exports.getLessons = asyncHandler(async (req, res, next) => {
-  let lessons = await Lesson.find();
+  const { filter, sort, skip, limit } = getQueryArgs(req.query);
+
+  let lessons = await Lesson.find(filter).sort(sort).skip(skip).limit(limit);
 
   const lessonsProgresses = await LessonProgress.find({ user: req.user.id });
 
