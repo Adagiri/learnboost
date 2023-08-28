@@ -1,7 +1,7 @@
 const asyncHandler = require('../middlewares/async');
 const Admin = require('../models/Admin');
 const ErrorResponse = require('../utils/errorResponse');
-const { getQueryArgs } = require('../utils/general');
+const { getQueryArgs, generateEncryptedPassword } = require('../utils/general');
 
 module.exports.getAdmins = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
@@ -43,7 +43,12 @@ module.exports.addAdmin = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.editAdmin = asyncHandler(async (req, res, next) => {
-  let admin = await Admin.findByIdAndUpdate(req.params.adminId, req.body);
+  const args = req.body.password;
+
+  if (args.password) {
+    args.password = await generateEncryptedPassword(args.password);
+  }
+  let admin = await Admin.findByIdAndUpdate(req.params.adminId, args);
 
   admin = admin.toObject();
   admin.id = admin._id;
