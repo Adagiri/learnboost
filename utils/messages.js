@@ -1,4 +1,4 @@
-const { generateEmailArguments, sendEmail } = require('./aws');
+const { createEmailParam, sendEmail } = require('./mails');
 
 module.exports.sendAccountActivationEmailForUser = async ({
   email,
@@ -20,7 +20,7 @@ module.exports.sendAccountActivationEmailForUser = async ({
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Activate your account',
@@ -29,6 +29,7 @@ module.exports.sendAccountActivationEmailForUser = async ({
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
 
@@ -52,7 +53,7 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Activate your account',
@@ -61,6 +62,7 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error);
+    throw error;
   }
 };
 
@@ -81,7 +83,7 @@ module.exports.sendResetPasswordEmailForUser = async (email, code) => {
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Reset your Password',
@@ -90,10 +92,11 @@ module.exports.sendResetPasswordEmailForUser = async (email, code) => {
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error, 'error from activation email');
+    throw error;
   }
 };
 
-module.exports.sendResetPasswordEmailForCompany = async (email, code) => {
+module.exports.sendResetPasswordEmailForMarketer = async (email, code) => {
   const message = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,7 +113,7 @@ module.exports.sendResetPasswordEmailForCompany = async (email, code) => {
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       email,
       'Reset your Password',
@@ -119,6 +122,7 @@ module.exports.sendResetPasswordEmailForCompany = async (email, code) => {
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error, 'error from activation email');
+    throw error;
   }
 };
 
@@ -132,19 +136,20 @@ module.exports.sendWelcomeEmailForUser = async ({ name, email }) => {
     <title>Learn Boost</title>
 </head>
 <body>
-    <p>Hi ${name}, welcome to Learn Smart</p>
+    <p>Hi ${name}, welcome to Learn Boost</p>
 </body>
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(null, email, 'Welcome', message);
+    const emailArgs = createEmailParam(null, email, 'Welcome', message);
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error, 'error whilst sending welcome message to user');
+    throw error;
   }
 };
 
-module.exports.sendWelcomeEmailForCompany = async ({ email }) => {
+module.exports.sendWelcomeEmailForMarketer = async ({ name, email }) => {
   const message = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -154,17 +159,19 @@ module.exports.sendWelcomeEmailForCompany = async ({ email }) => {
     <title>Learn Boost</title>
 </head>
 <body>
-    <p>Hi, welcome to Learn Smart</p>
+    <p>Hi ${name}, welcome to Learn Boost</p>
 </body>
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(null, email, 'Welcome', message);
+    const emailArgs = createEmailParam(null, email, 'Welcome', message);
     await sendEmail(emailArgs);
   } catch (error) {
     console.log(error, 'error whilst sending welcome message to user');
+    throw error;
   }
 };
+
 
 module.exports.sendWebhookErrorToDeveloper = async ({ subject, error }) => {
   const message = `<!DOCTYPE html>
@@ -181,7 +188,7 @@ module.exports.sendWebhookErrorToDeveloper = async ({ subject, error }) => {
 </html>`;
 
   try {
-    const emailArgs = generateEmailArguments(
+    const emailArgs = createEmailParam(
       null,
       'learnsmart023@gmail.com',
       subject,

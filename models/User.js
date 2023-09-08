@@ -49,6 +49,10 @@ const UserSchema = new mongoose.Schema({
     select: false,
   },
 
+  resetPasswordCode: String,
+  resetPasswordToken: String,
+  resetPasswordTokenExpiry: Date,
+
   accountActivationCode: String,
   accountActivationToken: String,
   accountActivationTokenExpiry: Date,
@@ -60,7 +64,6 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre('remove', async function (next) {
-  
   next();
 });
 

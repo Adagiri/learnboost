@@ -43,6 +43,10 @@ const MarketerSchema = new mongoose.Schema({
     default: 0,
   },
 
+  resetPasswordCode: String,
+  resetPasswordToken: String,
+  resetPasswordTokenExpiry: Date,
+
   accountActivationCode: String,
   accountActivationToken: String,
   accountActivationTokenExpiry: Date,

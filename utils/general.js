@@ -3,8 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-const { sendEmail, generateEmailArguments } = require('./aws');
-
 module.exports.generateRandomNumbers = (length) => {
   let code = '';
   while (code.length < length) {
@@ -49,7 +47,7 @@ const getSkip = (start) => {
 
 module.exports.getQueryArgs = (args) => {
   const filter = args || {};
-  console.log(filter, 'filter-1');
+
   // Transform the query if the property 'id' was added
   if (filter.id) {
     console.log(typeof filter.id);
@@ -83,8 +81,6 @@ module.exports.getQueryArgs = (args) => {
   } else {
     sort.createdAt = -1;
   }
-
-  console.log(filter, 'filter');
 
   return { filter, skip, limit, sort };
 };

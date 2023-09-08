@@ -5,7 +5,6 @@ const User = require('../models/User');
 const {
   sendAccountActivationEmailForUser,
   sendWelcomeEmailForUser,
-  sendResetPasswordEmailForCompany,
   sendResetPasswordEmailForUser,
   sendAccountActivationEmailForMarketer,
 } = require('../utils/messages');
@@ -127,25 +126,14 @@ module.exports.login = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.sendResetPasswordCode = asyncHandler(async (req, res, next) => {
-  const args = req.body;
-  const { accountType, email } = args;
-
-  // validate arguments
-  const model = accountType === 'company' ? Company : User;
-
-  const user = await model.findOne({
+  const email = req.body.email;
+  const user = await User.findOne({
     email: email,
-    registeredWith: 'email',
     isAccountActivated: true,
   });
 
   if (!user) {
-    return next(
-      new ErrorResponse(400, {
-        messageEn: 'No account with such email',
-        messageGe: 'Kein Konto mit einer solchen E-Mail',
-      })
-    );
+    return next(new ErrorResponse(400, 'No account with such email'));
   }
 
   const { token, encryptedToken, tokenExpiry, code } = generateVerificationCode(
@@ -158,11 +146,7 @@ module.exports.sendResetPasswordCode = asyncHandler(async (req, res, next) => {
   user.resetPasswordTokenExpiry = tokenExpiry;
   await user.save();
 
-  if (accountType === 'company') {
-    await sendResetPasswordEmailForCompany(email, code);
-  } else {
-    await sendResetPasswordEmailForUser(email, code);
-  }
+  await sendResetPasswordEmailForUser(email, code);
 
   // Send email
   return res.status(200).json({

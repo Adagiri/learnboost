@@ -33,7 +33,7 @@ const app = express();
 
 let origin = [
   'https://marketer.learnboost.com.ng',
-  'https://learnboost.cloudhacks.net',
+  'https://admin-sandbox.learnboost.com.ng',
   'https://admin.learnboost.com.ng',
 ];
 if (process.env.TEST_ENV === 'true') {
@@ -46,15 +46,12 @@ app.use(
 app.use(cookieParser());
 app.use(
   helmet({
-    contentSecurityPolicy:
-      process.env.NODE_ENV === 'production' && process.env.TEST_ENV === 'false'
-        ? true
-        : false,
+    contentSecurityPolicy: process.env.TEST_ENV === 'false' ? true : false,
   })
 );
 app.use(express.json());
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.TEST_ENV === 'true') {
   app.use(morgan('dev'));
 }
 
@@ -111,7 +108,7 @@ const PORT = process.env.PORT || 8000;
 
 const server = httpServer.listen(PORT, () => {
   console.log(
-    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
+    `Server running on port ${PORT}`.yellow.bold
   );
 });
 
