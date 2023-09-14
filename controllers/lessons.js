@@ -2,6 +2,7 @@ const asyncHandler = require('../middlewares/async');
 const Lesson = require('../models/Lesson');
 const Series = require('../models/Series');
 const LessonProgress = require('../models/SubLessonProgress');
+const ErrorResponse = require('../utils/errorResponse');
 const { getQueryArgs } = require('../utils/general');
 
 const deriveLessonProgress = (lessonId, lessonsProgresses) => {
@@ -15,6 +16,22 @@ const deriveLessonProgress = (lessonId, lessonsProgresses) => {
     return 0;
   }
 };
+
+module.exports.getLessonsForApp = asyncHandler(async (req, res, next) => {
+  let lessons = await Lesson.find(req.query);
+
+  const lessonsProgresses = await LessonProgress.find({ user: req.user.id });
+
+  lessons = lessons.map((lesson) => {
+    lesson = lesson.toObject();
+    lesson.id = lesson._id;
+    lesson.progress = deriveLessonProgress(lesson.id, lessonsProgresses);
+
+    return lesson;
+  });
+
+  return res.status(200).json(lessons);
+});
 
 module.exports.getLessons = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
@@ -38,6 +55,9 @@ module.exports.getLessons = asyncHandler(async (req, res, next) => {
 module.exports.getLesson = asyncHandler(async (req, res, next) => {
   let lesson = await Lesson.findById(req.params.lessonId);
 
+  if (!lesson) {
+    return next(new ErrorResponse(400, 'Invalid lesson id'));
+  }
   const lessonId = lesson._id;
   const userId = req.user.id;
 
@@ -92,5 +112,5 @@ module.exports.deleteLesson = asyncHandler(async (req, res, next) => {
     await lesson.remove();
   }
 
- return res.status(200).json(lesson);
+  return res.status(200).json(lesson);
 });

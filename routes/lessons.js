@@ -7,6 +7,7 @@ const {
   editLesson,
   getLessonProgress,
   deleteLesson,
+  getLessonsForApp,
 } = require('../controllers/lessons.js');
 const {
   protect,
@@ -20,6 +21,8 @@ router
   .route('/')
   .get(protect, getLessons)
   .post(protectAdmin, authorize('Master', 'Moderator'), addLesson);
+
+router.get('/app', protectUser, getLessonsForApp);
 
 router.route('/progress/:lessonId').get(protectUser, getLessonProgress);
 

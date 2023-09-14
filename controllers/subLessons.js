@@ -3,6 +3,7 @@ const Lesson = require('../models/Lesson');
 const LessonProgress = require('../models/LessonProgress');
 const SubLesson = require('../models/SubLesson');
 const SubLessonProgress = require('../models/SubLessonProgress');
+const ErrorResponse = require('../utils/errorResponse');
 const { getQueryArgs } = require('../utils/general');
 
 const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
@@ -17,6 +18,27 @@ const deriveSubLessonProgress = (subLessonId, subLessonsProgresses) => {
     return 0;
   }
 };
+
+module.exports.getSubLessonsForApp = asyncHandler(async (req, res, next) => {
+  let subLessons = await SubLesson.find(req.query);
+
+  const subLessonsProgresses = await SubLessonProgress.find({
+    user: req.user.id,
+  });
+
+  subLessons = subLessons.map((subLesson) => {
+    subLesson = subLesson.toObject();
+    subLesson.id = subLesson._id;
+    subLesson.progress = deriveSubLessonProgress(
+      subLesson.id,
+      subLessonsProgresses
+    );
+
+    return subLesson;
+  });
+
+  return res.status(200).json(subLessons);
+});
 
 module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
@@ -46,6 +68,10 @@ module.exports.getSubLessons = asyncHandler(async (req, res, next) => {
 
 module.exports.getSubLesson = asyncHandler(async (req, res, next) => {
   let subLesson = await SubLesson.findById(req.params.subLessonId);
+
+  if (!subLesson) {
+    return next(new ErrorResponse(400, 'Invalid sub lesson id'));
+  }
 
   subLesson = subLesson.toObject();
   subLesson.id = subLesson._id;

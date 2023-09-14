@@ -47,7 +47,6 @@ const getSkip = (start) => {
 
 module.exports.getQueryArgs = (args) => {
   const filter = args || {};
-
   // Transform the query if the property 'id' was added
   if (filter.id) {
     console.log(typeof filter.id);

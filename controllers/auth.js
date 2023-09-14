@@ -118,6 +118,9 @@ module.exports.login = asyncHandler(async (req, res, next) => {
 
   const authToken = getSignedJwtToken(user);
 
+  user = user.toObject();
+  delete user.password;
+
   return res.status(200).json({
     success: true,
     authToken: authToken,

@@ -1,7 +1,15 @@
 const asyncHandler = require('../middlewares/async');
 const Category = require('../models/Category');
 const Series = require('../models/Series');
+const ErrorResponse = require('../utils/errorResponse');
 const { getQueryArgs } = require('../utils/general');
+
+module.exports.getSeriesForApp = asyncHandler(async (req, res, next) => {
+  
+  let series = await Series.find(req.query);
+
+  return res.status(200).json(series);
+});
 
 module.exports.getSeries = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
@@ -22,6 +30,9 @@ module.exports.getSeries = asyncHandler(async (req, res, next) => {
 module.exports.getSeriesById = asyncHandler(async (req, res, next) => {
   let series = await Series.findById(req.params.seriesId);
 
+  if (!series) {
+    return next(new ErrorResponse(400, 'Invalid series id'));
+  }
   series = series.toObject();
   series.id = series._id;
   return res.status(200).json(series);

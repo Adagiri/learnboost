@@ -6,14 +6,22 @@ const {
   getSeriesById,
   editSeries,
   deleteSeries,
+  getSeriesForApp,
 } = require('../controllers/series.js');
-const { protect, authorize, protectAdmin } = require('../middlewares/auth.js');
+const {
+  protect,
+  authorize,
+  protectAdmin,
+  protectUser,
+} = require('../middlewares/auth.js');
 const router = express.Router();
 
 router
   .route('/')
-  .get(getSeries)
+  .get(protectAdmin, getSeries)
   .post(protectAdmin, authorize('Master', 'Moderator'), addSeries);
+
+router.get('/app', protectUser, getSeriesForApp);
 
 router
   .route('/:seriesId')

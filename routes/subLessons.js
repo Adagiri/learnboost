@@ -5,6 +5,7 @@ const {
   addSubLesson,
   getSubLesson,
   editSubLesson,
+  getSubLessonsForApp,
   getSubLessonProgress,
   updateSubLessonProgress,
   deleteSubLesson,
@@ -21,6 +22,8 @@ router
   .route('/')
   .get(protect, getSubLessons)
   .post(protectAdmin, authorize('Master', 'Moderator'), addSubLesson);
+
+router.get('/app', protectUser, getSubLessonsForApp);
 
 router
   .route('/progress/:subLessonId')

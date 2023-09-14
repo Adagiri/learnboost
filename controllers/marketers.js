@@ -5,6 +5,7 @@ const { getQueryArgs } = require('../utils/general');
 module.exports.getMarketers = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
 
+  filter.isAccountActivated = true;
   let marketers = await Marketer.find(filter)
     .sort(sort)
     .skip(skip)
@@ -27,4 +28,3 @@ module.exports.getMarketer = asyncHandler(async (req, res, next) => {
   marketer.id = marketer._id;
   return res.status(200).json(marketer);
 });
-
