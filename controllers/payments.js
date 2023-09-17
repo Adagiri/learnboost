@@ -9,17 +9,17 @@ module.exports.initiateTransactionForSubscription = asyncHandler(
     const currentDate = new Date();
 
     console.log(user);
-    if (
-      user.subscriptionEndDate &&
-      new Date(user.subscriptionEndDate) > currentDate
-    ) {
-      return next(
-        new ErrorResponse(
-          400,
-          'You still have an active subscription. Please wait till your subscription expires.'
-        )
-      );
-    }
+    // if (
+    //   user.subscriptionEndDate &&
+    //   new Date(user.subscriptionEndDate) > currentDate
+    // ) {
+    //   return next(
+    //     new ErrorResponse(
+    //       400,
+    //       'You still have an active subscription. Please wait till your subscription expires.'
+    //     )
+    //   );
+    // }
 
     console.log('ran');
     const subscriptionType = req.query.sub_type;
