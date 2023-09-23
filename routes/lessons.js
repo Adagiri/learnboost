@@ -8,6 +8,7 @@ const {
   getLessonProgress,
   deleteLesson,
   getLessonsForApp,
+  searchLesson,
 } = require('../controllers/lessons.js');
 const {
   protect,
@@ -23,6 +24,7 @@ router
   .post(protectAdmin, authorize('Master', 'Moderator'), addLesson);
 
 router.get('/app', protectUser, getLessonsForApp);
+router.get('/search', protectUser, searchLesson);
 
 router.route('/progress/:lessonId').get(protectUser, getLessonProgress);
 

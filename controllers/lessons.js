@@ -33,6 +33,28 @@ module.exports.getLessonsForApp = asyncHandler(async (req, res, next) => {
   return res.status(200).json(lessons);
 });
 
+module.exports.searchLesson = asyncHandler(async (req, res, next) => {
+  const text = req.query.text;
+  const regex = new RegExp(text, 'i');
+
+  const query = { title: { $regex: regex } };
+
+  let lessons = await Lesson.find(query);
+
+  const lessonsProgresses = await LessonProgress.find({ user: req.user.id });
+
+  lessons = lessons.map((lesson) => {
+    lesson = lesson.toObject();
+    lesson.id = lesson._id;
+    lesson.progress = deriveLessonProgress(lesson.id, lessonsProgresses);
+
+    return lesson;
+  });
+
+  res.header('X-Total-Count', lessons.length);
+  res.status(200).json(lessons);
+});
+
 module.exports.getLessons = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
 
