@@ -18,6 +18,9 @@ const users = require('./routes/users');
 const marketers = require('./routes/marketers');
 const admins = require('./routes/admins');
 const misc = require('./routes/misc');
+const earnings = require('./routes/earnings');
+const subscriptions = require('./routes/subscriptions');
+const withdrawals = require('./routes/withdrawals');
 const { createWebhookHash } = require('./utils/misc');
 const { handleWebhook } = require('./services/PaystackService');
 
@@ -61,7 +64,6 @@ app.get('/', (req, res) => {
   return res.send('Hello there!');
 });
 
-// Paystack transaction webhook
 app.post(
   '/api/paystack/transaction-completion-webhook',
   async function (req, res) {
@@ -101,15 +103,16 @@ app.use('/api/v1/users', users);
 app.use('/api/v1/marketers', marketers);
 app.use('/api/v1/admins', admins);
 app.use('/api/v1/misc', misc);
+app.use('/api/v1/withdrawals', withdrawals);
+app.use('/api/v1/earnings', earnings);
+app.use('/api/v1/subscriptions', subscriptions);
 
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 8000;
 
 const server = httpServer.listen(PORT, () => {
-  console.log(
-    `Server running on port ${PORT}`.yellow.bold
-  );
+  console.log(`Server running on port ${PORT}`.yellow.bold);
 });
 
 process.on('unhandledRejection', (err, promise) => {

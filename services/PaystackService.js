@@ -1,10 +1,29 @@
 const axios = require('axios');
 const { randomNumbers } = require('../utils/misc');
 const {
-  processSubscriptionTransactionWebhook,
+  processSubscriptionTransaction,
+  processDisbursement,
 } = require('../controllers/webhooks');
-const { sendWebhookErrorToDeveloper } = require('../utils/messages');
+const {
+  sendErrorToDeveloper,
+  sendNotificationEmailToAUser,
+} = require('../utils/messages');
 const WebhookError = require('../models/WebhookError');
+const { generateRandomString } = require('../utils/general');
+const PendingWithdrawal = require('../models/PendingWithdrawal');
+
+const transferFailureContent = (name) => `
+Dear ${name},
+
+We regret to inform you that we encountered an issue while processing your recent withdrawal request. Unfortunately, we were unable to complete the transaction at this time.
+
+We kindly request you to initiate the withdrawal process again. If the issue persists or if you have any questions, please don't hesitate to reach out to our support team. We are here to assist you and ensure a smooth transaction experience.
+
+Thank you for your understanding and cooperation.
+
+Best regards,
+LearnBoost
+`;
 
 module.exports.initialiseTransaction = async (
   amount,
@@ -12,39 +31,142 @@ module.exports.initialiseTransaction = async (
   metadata,
   channels
 ) => {
+  try {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = process.env.PAYSTACK_BASE_URL;
+
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
+
+    const amountInKobo = amount * 100;
+    const data = {
+      email,
+      amount: amountInKobo,
+      metadata: metadata ? metadata : undefined,
+      channels: channels ? channels : undefined,
+      reference: randomNumbers(20).toString(),
+    };
+
+    const response = await axios.post(
+      baseUrl + '/transaction/initialize',
+      data,
+      {
+        headers,
+      }
+    );
+
+    return response.data.data;
+  } catch (error) {
+    console.log('Error Occured Whilst Initiating Transaction: ', error);
+    throw error.response.data;
+  }
+};
+
+module.exports.createTransferRecipient = async (
+  name,
+  account_number,
+  bank_code,
+  metadata
+) => {
   const secretKey = process.env.PAYSTACK_SECRET_KEY;
   const baseUrl = process.env.PAYSTACK_BASE_URL;
 
-  const headers = {
-    Authorization: 'Bearer ' + secretKey,
-    'Content-Type': 'application/json',
-  };
+  try {
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
 
-  const amountInKobo = amount * 100;
-  const data = {
-    email,
-    amount: amountInKobo,
-    metadata: metadata ? metadata : undefined,
-    channels: channels ? channels : undefined,
-    reference: randomNumbers(20).toString(),
-  };
+    const data = {
+      type: 'nuban',
+      name,
+      account_number,
+      bank_code,
+      currency: 'NGN',
+    };
 
-  return axios.post(baseUrl + '/transaction/initialize', data, {
-    headers,
-  });
+    metadata && (data.metadata = metadata);
+
+    const response = await axios.post(baseUrl + '/transferrecipient', data, {
+      headers,
+    });
+
+    return response.data.data.recipient_code;
+  } catch (error) {
+    console.log('Error Occured Whilst Creating Transfer Recipient: ', error);
+    throw error.response?.data;
+  }
+};
+
+module.exports.disburseSingle = async (amount, reason, recipient) => {
+  try {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = process.env.PAYSTACK_BASE_URL;
+
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
+
+    const amountInKobo = amount * 100;
+    const data = {
+      source: 'balance',
+      reason,
+      amount: amountInKobo,
+      recipient,
+      reference: generateRandomString(20),
+    };
+
+    const response = await axios.post(baseUrl + '/transfer', data, {
+      headers,
+    });
+
+    return response.data.data.reference;
+  } catch (error) {
+    console.log('Error Occured During Disbursement: ', error);
+
+    const err = error.response.data.message;
+
+    if (err === 'Your balance is not enough to fulfil this request') {
+      await sendErrorToDeveloper({
+        subject: 'Disbursement Failed',
+        error: err,
+      });
+
+      throw new Error('Please retry in 30 minutes');
+    }
+    throw error.response.data;
+  }
+};
+
+module.exports.getBanks = async () => {
+  try {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = process.env.PAYSTACK_BASE_URL;
+
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
+
+    const response = await axios.get(baseUrl + '/bank', {
+      headers,
+    });
+
+    return response.data.data;
+  } catch (error) {
+    console.log('Error Occured Whilst Fetching Banks: ', error);
+
+    throw error.response.data;
+  }
 };
 
 module.exports.handleWebhook = async (payload) => {
   let { event, data } = payload;
 
   console.log(event, 'event');
-  // console.log(data, 'data');
-
-  let transactionType = 'disburse';
-
-  if (event.startsWith('charge')) {
-    transactionType = 'card';
-  }
 
   // Convert from kobo to naira (Amount from paystack is in -kobo-)
   const transactionAmount = Number(data.amount) / 100;
@@ -52,7 +174,7 @@ module.exports.handleWebhook = async (payload) => {
   // Successful paystack transaction (card or transfer)
   if (event === 'charge.success') {
     try {
-      await processSubscriptionTransactionWebhook({
+      await processSubscriptionTransaction({
         metadata: data.metadata,
         channel: data.channel,
         reference: data.reference,
@@ -72,7 +194,7 @@ module.exports.handleWebhook = async (payload) => {
       });
 
       // Send email to developers
-      await sendWebhookErrorToDeveloper({
+      await sendErrorToDeveloper({
         subject: subject,
         error: error,
       });
@@ -80,17 +202,50 @@ module.exports.handleWebhook = async (payload) => {
       throw error;
     }
   }
+
+  if (event.startsWith('transfer')) {
+    try {
+      if (event === 'transfer.success') {
+        await processDisbursement({
+          metadata: data.metadata,
+          reference: data.reference,
+          transactionAmount: transactionAmount,
+          transactionDate: data.created_at,
+        });
+      }
+
+      if (event === 'transfer.failed' || event === 'transfer.reversed') {
+        await PendingWithdrawal.deleteMany({ marketer: await PendingWithdraw });
+        const subject =
+          'Important: Issue with Your Recent Withdrawal Transactiond';
+        await sendNotificationEmailToAUser({
+          subject,
+          content: transferFailureContent(data.metadata?.marketerName),
+          email: data.metadata?.marketerEmail,
+        });
+      }
+    } catch (error) {
+      const subject = 'Error During Processing of Disbursement Transaction';
+
+      // Save error to DB
+      await WebhookError.create({
+        subject: subject,
+        error: error,
+        type: 'DisbursementTransaction',
+        reference: data.reference,
+      });
+
+      // Send email to developers
+      await sendErrorToDeveloper({
+        subject: subject,
+        error: error,
+      });
+
+      throw error;
+    }
+    console.log('webhook received');
+  }
 };
-
-// FOR DISBURSEMENTS
-// transfer.failed;
-// transfer.success;
-// transfer.reversed;
-
-// FOR CARD
-// charge.success
-
-// FOR BANK TRANSFER
 
 // POSSIBLE DISPUTES
 // charge.dispute.create

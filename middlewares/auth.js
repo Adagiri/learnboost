@@ -82,12 +82,7 @@ module.exports.protectMarketer = asyncHandler(async (req, res, next) => {
   }
 
   if (!token) {
-    return next(
-      new ErrorResponse(401, {
-        messageEn: 'Please log in to continue',
-        messageGe: 'bitte einloggen zum Fortfahren',
-      })
-    );
+    return next(new ErrorResponse(401, 'Please log in to continue'));
   }
 
   try {
@@ -96,12 +91,7 @@ module.exports.protectMarketer = asyncHandler(async (req, res, next) => {
       'Marketer_name email accountType role registeredWith accountType'
     );
     if (!req.user) {
-      return next(
-        new ErrorResponse(403, {
-          messageEn: 'You are not authorized',
-          messageGe: 'Sie sind nicht berechtigt',
-        })
-      );
+      return next(new ErrorResponse(403, 'You are not authorized'));
     }
 
     req.user.id = req.user._id;

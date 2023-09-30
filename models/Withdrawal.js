@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MarketerWithdrawalTransactionSchema = new mongoose.Schema({
+const WithdrawalSchema = new mongoose.Schema({
   amount: {
     type: String,
     trim: true,
@@ -17,14 +17,11 @@ const MarketerWithdrawalTransactionSchema = new mongoose.Schema({
     default: 'Paystack',
   },
 
-  paymentHandlerReference: {
-    type: String,
-    required: true,
-  },
-
-  transactionCharge: {
-    type: Number,
-    required: true,
+  accountDetails: {
+    bank_code: String,
+    account_number: String,
+    account_name: String,
+    bank_name: String,
   },
 
   transactionDate: {
@@ -33,7 +30,4 @@ const MarketerWithdrawalTransactionSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model(
-  'MarketerWithdrawalTransaction',
-  MarketerWithdrawalTransactionSchema
-);
+module.exports = mongoose.model('Withdrawal', WithdrawalSchema);

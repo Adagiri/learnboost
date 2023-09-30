@@ -12,17 +12,20 @@ const {
   registerAdmin,
   loginMarketer,
   registerMarketer,
-  verifyEmailMarketer,
+  verifyEmailForMarketer,
+  forgotPasswordMarketer,
+  resetPasswordMarketer,
 } = require('../controllers/auth');
 const router = express.Router();
 
 router.post('/admin/login', loginAdmin);
 router.post('/admin/register', registerAdmin);
 
-router.post('/marketer/login', loginMarketer);
-router.post('/marketer/register', registerMarketer);
-router.post('/marketer/verify-email', verifyEmailMarketer);
-
+router.post('/marketers/login', loginMarketer);
+router.post('/marketers/register', registerMarketer);
+router.post('/marketers/verify-email', verifyEmailForMarketer);
+router.post('/marketers/forgot-password',forgotPasswordMarketer);
+router.post('/marketers/reset-password', resetPasswordMarketer);
 
 router.post('/register', register);
 router.post('/verify-email', verifyEmail);

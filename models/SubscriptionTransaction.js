@@ -24,9 +24,9 @@ const SubscriptionTransactionSchema = new mongoose.Schema({
   },
 
   bankAccountDetails: {
-    bankName: String,
-    accountName: String,
-    accountNumber: String,
+    bank_name: String,
+    account_name: String,
+    account_number: String,
   },
 
   transactionDate: {

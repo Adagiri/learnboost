@@ -138,3 +138,31 @@ module.exports.generateEncryptedPassword = async (password) => {
 
   return encryptedPassword;
 };
+
+module.exports.calculatePaystackTransactionCharge = async (amount) => {
+  try {
+    // const generalInfos = await 
+  } catch (error) {
+    throw error;
+  }
+  // Get the Paystack transaction fee percentage.
+  const transactionFeePercentage = 0.015;
+
+  // Calculate the transaction fee.
+  const transactionFee = amount * transactionFeePercentage;
+
+  // Add a flat fee of ₦100.
+  const flatFee = 100;
+
+  // Calculate the total Paystack charge.
+  const totalPaystackCharge = transactionFee + flatFee;
+
+  // Check if the total Paystack charge is greater than the Paystack charge cap fee.
+  if (totalPaystackCharge > 2000) {
+    // Set the total Paystack charge to the Paystack charge cap fee.
+    totalPaystackCharge = 2000;
+  }
+
+  // Return the total Paystack charge.
+  return totalPaystackCharge;
+};

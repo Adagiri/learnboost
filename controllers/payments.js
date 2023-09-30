@@ -1,7 +1,10 @@
 const asyncHandler = require('../middlewares/async');
+const Marketer = require('../models/Marketer');
 const User = require('../models/User');
 const { initialiseTransaction } = require('../services/PaystackService');
 const ErrorResponse = require('../utils/errorResponse');
+const PaystackService = require('../services/PaystackService');
+const PendingWithdrawal = require('../models/PendingWithdrawal');
 
 module.exports.initiateTransactionForSubscription = asyncHandler(
   async (req, res, next) => {
@@ -35,14 +38,12 @@ module.exports.initiateTransactionForSubscription = asyncHandler(
     };
 
     try {
-      const response = await initialiseTransaction(
+      const data = await initialiseTransaction(
         amount,
         email,
         metadata,
         channels
       );
-
-      const data = response.data.data;
 
       return res.status(200).json({
         success: true,
@@ -53,3 +54,56 @@ module.exports.initiateTransactionForSubscription = asyncHandler(
     }
   }
 );
+
+module.exports.withdrawEarning = asyncHandler(async (req, res, next) => {
+  const marketer = await Marketer.findById(req.user.id);
+
+  const existingTransaction = await PendingWithdrawal.findOne({
+    marketer: marketer._id,
+  });
+
+  if (existingTransaction) {
+    return next(
+      new ErrorResponse(
+        404,
+        'You have a pending withdrawal request. Please try again later.'
+      )
+    );
+  }
+
+  const account_number = req.body.account_number;
+  const bank_code = req.body.bank_code;
+  const name = marketer.name;
+  const metadata = {
+    marketerId: marketer._id,
+    marketerName: name,
+    marketerEmail: marketer.email,
+  };
+
+  const recipient = await PaystackService.createTransferRecipient(
+    name,
+    account_number,
+    bank_code,
+    metadata
+  );
+
+  console.log(recipient);
+
+  // Make transfer
+  const reason = 'Marketer_Withdraw_Earnings';
+  const amount = marketer.walletBalance;
+  const reference = await PaystackService.disburseSingle(
+    amount,
+    reason,
+    recipient
+  );
+  await PendingWithdrawal({ marketer: marketer._id, reference });
+
+  return res.status(200).json({ success: true, marketer: marketer });
+});
+
+module.exports.getBanks = asyncHandler(async (req, res, next) => {
+  const banks = await PaystackService.getBanks();
+
+  return res.status(200).json({ banks });
+});

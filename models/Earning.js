@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MarketingEarningsRecordSchema = new mongoose.Schema({
+const EarningSchema = new mongoose.Schema({
   user: {
     type: mongoose.Types.ObjectId,
     ref: 'User',
@@ -29,13 +29,17 @@ const MarketingEarningsRecordSchema = new mongoose.Schema({
     required: true,
   },
 
+  status: {
+    type: String,
+    required: true,
+    default: 'unwithdrawn',
+    enum: ['withdrawn', 'unwithdrawn'],
+  },
+
   transactionDate: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model(
-  'MarketingEarningsRecord',
-  MarketingEarningsRecordSchema
-);
+module.exports = mongoose.model('Earning', EarningSchema);

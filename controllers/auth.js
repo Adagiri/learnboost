@@ -7,6 +7,7 @@ const {
   sendWelcomeEmailForUser,
   sendResetPasswordEmailForUser,
   sendAccountActivationEmailForMarketer,
+  sendResetPasswordEmailForMarketer,
 } = require('../utils/messages');
 
 const {
@@ -353,7 +354,7 @@ module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
 
   const existingAccount = await Marketer.findOne({
     email: email,
-    isAccountActivated: true,
+    isEmailVerified: true,
   });
 
   if (existingAccount) {
@@ -364,7 +365,6 @@ module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
     20,
     10
   );
-
   args.password = await generateEncryptedPassword(args.password);
   args.accountActivationCode = code;
   args.accountActivationToken = encryptedToken;
@@ -381,7 +381,7 @@ module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
   });
 });
 
-module.exports.verifyEmailMarketer = asyncHandler(async (req, res, next) => {
+module.exports.verifyEmailForMarketer = asyncHandler(async (req, res, next) => {
   const args = req.body;
 
   const encryptedToken = getEncryptedToken(args.token);
@@ -407,7 +407,7 @@ module.exports.verifyEmailMarketer = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(400, 'Incorrect code'));
   }
 
-  marketer.isAccountActivated = true;
+  marketer.isEmailVerified = true;
   marketer.accountActivationToken = undefined;
   marketer.accountActivationCode = undefined;
   marketer.accountActivationTokenExpiry = undefined;
@@ -446,6 +446,10 @@ module.exports.loginMarketer = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(400, 'Invalid credentials'));
   }
 
+  if (!marketer.isAccountApproved) {
+    return next(new ErrorResponse(403, 'Your account have not been approved'));
+  }
+
   const authToken = getSignedJwtToken(marketer);
 
   marketer = marketer.toObject();
@@ -454,5 +458,67 @@ module.exports.loginMarketer = asyncHandler(async (req, res, next) => {
     success: true,
     authToken: authToken,
     marketer: marketer,
+  });
+});
+
+module.exports.forgotPasswordMarketer = asyncHandler(async (req, res, next) => {
+  const email = req.body.email;
+  const marketer = await Marketer.findOne({
+    email: email,
+    isAccountActivated: true,
+    isAccountApproved: true,
+  });
+
+  if (!marketer) {
+    return next(new ErrorResponse(400, 'No account with such email'));
+  }
+
+  const { token, encryptedToken, tokenExpiry } = generateVerificationCode(
+    20,
+    10
+  );
+
+  marketer.resetPasswordToken = encryptedToken;
+  marketer.resetPasswordTokenExpiry = tokenExpiry;
+  await marketer.save();
+
+  await sendResetPasswordEmailForMarketer(email, token);
+
+  // Send email
+  return res.status(200).json({
+    success: true,
+  });
+});
+
+module.exports.resetPasswordMarketer = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+  // validate arguments
+
+  const encryptedToken = getEncryptedToken(args.token);
+
+  const marketer = await Marketer.findOne({
+    resetPasswordToken: encryptedToken,
+  });
+
+  if (!marketer) {
+    return next(new ErrorResponse(404, 'Invalid token'));
+  }
+
+  if (new Date(marketer.resetPasswordTokenExpiry) < new Date()) {
+    marketer.resetPasswordToken = undefined;
+    marketer.resetPasswordCode = undefined;
+    marketer.resetPasswordTokenExpiry = undefined;
+    await marketer.save();
+    return next(new ErrorResponse(400, 'Reset password session expired'));
+  }
+
+  marketer.password = await generateEncryptedPassword(args.password);
+  marketer.resetPasswordToken = undefined;
+  marketer.resetPasswordTokenExpiry = undefined;
+
+  await marketer.save();
+
+  return res.status(200).json({
+    success: true,
   });
 });

@@ -416,16 +416,16 @@ authenticated admins only</small><br><br><h5 class="label label-warning">Headers
 &nbsp;
 {{URL}}/api/v1/tutors/bank</h4></a></div><div id=collapse-Tutors-AddBank class="panel-collapse collapse"><div class=panel-body><h5 class="label label-default">Description</h5><br><small><p>Add bank account details<p><strong>ACCESS</strong>: Authenticated tutor<p><strong>Notice</strong>:
 <em>currency</em> is the currency of the country which the bank operates
-<em>bankCode</em> is the unique code of the bank
+<em>bank_code</em> is the unique code of the bank
 <em>type</em> is the account type and can be one of the following
 - nuban
 - mobile_money
-- basa<p><em>currency</em>, <em>type</em> and <em>bankCode</em> can be gotten from the GET BANKS api {{URL}}:/api/v1/extras/get-banks</small><br><br><h5 class="label label-warning">Headers</h5><table class="table table-hover"><thead><tr><th>Key<th>Value<th>Description<tbody><tr><td>Content-Type<td>application/json<td><p>Json Type</table><h5 class="label label-primary">Body</h5><span class=resp-prettyprint>{
-&#34;accountName&#34;: &#34;Ibrahim Ridwanullah Adagiri&#34;,
-&#34;accountNumber&#34;: &#34;0148567979&#34;,
+- basa<p><em>currency</em>, <em>type</em> and <em>bank_code</em> can be gotten from the GET BANKS api {{URL}}:/api/v1/extras/get-banks</small><br><br><h5 class="label label-warning">Headers</h5><table class="table table-hover"><thead><tr><th>Key<th>Value<th>Description<tbody><tr><td>Content-Type<td>application/json<td><p>Json Type</table><h5 class="label label-primary">Body</h5><span class=resp-prettyprint>{
+&#34;account_name&#34;: &#34;Ibrahim Ridwanullah Adagiri&#34;,
+&#34;account_number&#34;: &#34;0148567979&#34;,
 &#34;currency&#34;: &#34;NGN&#34;,
 &#34;type&#34;: &#34;nuban&#34;,
-&#34;bankCode&#34;: &#34;058&#34;
+&#34;bank_code&#34;: &#34;058&#34;
 }</span><div class=clearfix></div></div></div></div><div class="panel panel-warning" id=jump-Tutors-ChangePassword><div class=panel-heading><small class="pull-right text-muted">raw</small>
 <a class=text-warning data-toggle=collapse data-parent=#accordion-Tutors href=#collapse-Tutors-ChangePassword><h4 class=panel-title><span class="glyphicon glyphicon-plus"></span><strong>Change Password</strong> &nbsp;|&nbsp;
 <strong class="request-method border-warning">PUT</strong>
@@ -535,16 +535,16 @@ authenticated tutors only<p><strong>PARAMETERS</strong><p>platform - The device 
 &nbsp;
 {{URL}}/api/v1/tutors/bank/6276a3d367703d4d7b1c9726</h4></a></div><div id=collapse-Tutors-UpdateBank class="panel-collapse collapse"><div class=panel-body><h5 class="label label-default">Description</h5><br><small><p>Update bank<p><strong>ACCESS</strong>: Authenticated tutor<p><strong>Notice</strong>:
 <em>currency</em> is the currency of the country which the bank operates
-<em>bankCode</em> is the unique code of the bank
+<em>bank_code</em> is the unique code of the bank
 <em>type</em> is the account type and can be one of the following
 - nuban
 - mobile_money
-- basa<p><em>currency</em>, <em>type</em> and <em>bankCode</em> can be gotten from the GET BANKS api {{URL}}:/api/v1/extras/get-banks</small><br><br><h5 class="label label-warning">Headers</h5><table class="table table-hover"><thead><tr><th>Key<th>Value<th>Description<tbody><tr><td>Content-Type<td>application/json<td><p>Json Type</table><h5 class="label label-primary">Body</h5><span class=resp-prettyprint>{
-&#34;accountName&#34;: &#34;Ibrahim Ridwanullah Adagiri&#34;,
-&#34;accountNumber&#34;: &#34;0148567970&#34;,
+- basa<p><em>currency</em>, <em>type</em> and <em>bank_code</em> can be gotten from the GET BANKS api {{URL}}:/api/v1/extras/get-banks</small><br><br><h5 class="label label-warning">Headers</h5><table class="table table-hover"><thead><tr><th>Key<th>Value<th>Description<tbody><tr><td>Content-Type<td>application/json<td><p>Json Type</table><h5 class="label label-primary">Body</h5><span class=resp-prettyprint>{
+&#34;account_name&#34;: &#34;Ibrahim Ridwanullah Adagiri&#34;,
+&#34;account_number&#34;: &#34;0148567970&#34;,
 &#34;currency&#34;: &#34;NGN&#34;,
 &#34;type&#34;: &#34;nuban&#34;,
-&#34;bankCode&#34;: &#34;058&#34;
+&#34;bank_code&#34;: &#34;058&#34;
 }</span><div class=clearfix></div></div></div></div><div class="panel panel-warning" id=jump-Tutors-UpdatePersonalInfo><div class=panel-heading><small class="pull-right text-muted">raw</small>
 <a class=text-warning data-toggle=collapse data-parent=#accordion-Tutors href=#collapse-Tutors-UpdatePersonalInfo><h4 class=panel-title><span class="glyphicon glyphicon-plus"></span><strong>Update Personal Info</strong> &nbsp;|&nbsp;
 <strong class="request-method border-warning">PUT</strong>

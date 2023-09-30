@@ -4,9 +4,11 @@ const User = require('../models/User');
 const Marketer = require('../models/Marketer');
 const CompanyData = require('../models/CompanyData');
 const SubscriptionTransaction = require('../models/SubscriptionTransaction');
-const MarketingEarningsRecord = require('../models/MarketingEarningsRecord');
+const Earning = require('../models/Earning');
+const PendingWithdrawal = require('../models/PendingWithdrawal');
+const Withdrawal = require('../models/Withdrawal');
 
-module.exports.processSubscriptionTransactionWebhook = async ({
+module.exports.processSubscriptionTransaction = async ({
   metadata,
   channel,
   reference,
@@ -53,9 +55,9 @@ module.exports.processSubscriptionTransactionWebhook = async ({
 
     if (channel === 'bank_transfer') {
       subscriptionTransactionArgs.bankAccountDetails = {
-        accountName: authorization.sender_bank,
-        accountNumber: authorization.sender_bank_account_number,
-        accountName: authorization.sender_name,
+        account_name: authorization.sender_bank,
+        account_number: authorization.sender_bank_account_number,
+        account_name: authorization.sender_name,
       };
     }
 
@@ -106,7 +108,7 @@ module.exports.processSubscriptionTransactionWebhook = async ({
         await marketer.save({ session });
 
         // Create Marketing Earning Record
-        await MarketingEarningsRecord.create([marketingEarningRecordArgs], {
+        await Earning.create([marketingEarningRecordArgs], {
           session,
         });
       }
@@ -116,6 +118,59 @@ module.exports.processSubscriptionTransactionWebhook = async ({
     console.log(
       error,
       'Error occurred while processing subscription transaction webhook'
+    );
+
+    throw error;
+  } finally {
+    // End the Mongoose session
+    session.endSession();
+  }
+};
+
+module.exports.processDisbursement = async ({
+  metadata,
+  reference,
+  transactionAmount,
+  transactionDate,
+}) => {
+  // Start a Mongoose session to handle transactions
+  const session = await mongoose.startSession();
+
+  try {
+    const marketerId = metadata.marketerId;
+    const marketer = await Marketer.findById(marketerId);
+
+    // Use a Mongoose session to ensure transactional integrity
+    await session.withTransaction(async () => {
+      // deduct walletBalance from marketer
+      marketer.walletBalance = 0;
+      await marketer.save({ session });
+
+      // change earning statuses to "withdrawn"
+      await Earning.updateMany(
+        { marketer: marketerId },
+        { status: 'withdrawn' },
+        { session }
+      );
+
+      // delete pending withdrawals
+      await PendingWithdrawal.deleteMany({ marketer: marketerId }, { session });
+
+      // save withdrawal transactions
+      const withdrawalTransaction = new Withdrawal({
+        amount: transactionAmount,
+        reference: reference,
+        paymentHandler: 'Paystack',
+        accountDetails: accountDetails,
+        transactionDate: transactionDate,
+      });
+      await withdrawalTransaction.save({ session });
+    });
+  } catch (error) {
+    // Log and rethrow any errors
+    console.log(
+      error,
+      'Error occurred while processing disbursement transaction webhook'
     );
 
     throw error;

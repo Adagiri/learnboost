@@ -28,9 +28,20 @@ const MarketerSchema = new mongoose.Schema({
     select: false,
   },
 
-  isAccountActivated: {
+  isEmailVerified: {
     type: Boolean,
     default: false,
+  },
+
+  isAccountApproved: {
+    type: Boolean,
+    default: false,
+  },
+
+  approvalStatus: {
+    type: String,
+    default: 'pending',
+    enum: ["accepted", "rejected", "pending"]
   },
 
   referralCode: {
