@@ -17,6 +17,6 @@ router
 router
   .route('/:categoryId')
   .get(protect, getCategory)
-  // .put(protectAdmin, authorize('Master', 'Moderator'), editCategory);
+  .put(protectAdmin, authorize('Master', 'Moderator'), editCategory);
 
 module.exports = router;
