@@ -37,7 +37,7 @@ module.exports.addCategory = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.editCategory = asyncHandler(async (req, res, next) => {
-  const category = await Category.findByIdAndUpdate(
+  let category = await Category.findByIdAndUpdate(
     req.params.categoryId,
     req.body
   );
