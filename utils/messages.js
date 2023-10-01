@@ -12,12 +12,40 @@ module.exports.sendAccountActivationEmailForUser = async ({
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Boost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <p>Hi ${name}, please use the code below to activate your account.</p>
-    <p>${code}</p>
+    <div class="container">
+        <div class="message">Hi ${name}, please use the code below to activate your account:</div>
+        <div class="code">${code}</div>
+    </div>
 </body>
-</html>`;
+</html>
+`;
 
   try {
     const emailArgs = createEmailParam(
@@ -45,12 +73,40 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn Boost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .code {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <p>Hi ${name}, please use the code below to activate your account.</p>
-    <p>${code}</p>
+    <div class="container">
+        <div class="message">Hi ${name}, please use the code below to activate your account:</div>
+        <div class="code">${code}</div>
+    </div>
 </body>
-</html>`;
+</html>
+`;
 
   try {
     const emailArgs = createEmailParam(
@@ -76,11 +132,14 @@ module.exports.sendResetPasswordEmailForUser = async (email, code) => {
     <title>Learn Boost</title>
 </head>
 <body>
-    <p>Hi, please use the code below to reset your password. However, if you did not initiate a reset password request, please ignore this mail</p>
-    <p>>${code}</a></p>
-    <p>Please note that link expires in 10 minutes</p>
+    <p>Hi there,</p>
+    <p>Please use the code below to reset your password. If you didn't initiate a password reset, kindly ignore this email.</p>
+    <p><strong>Reset Code:</strong> ${code}</p>
+    <p>Please be aware that this link will expire in 10 minutes.</p>
+    <p>Best regards,<br>Your Learn Boost Team</p>
 </body>
-</html>`;
+</html>
+`;
 
   try {
     const emailArgs = createEmailParam(
@@ -178,12 +237,52 @@ module.exports.sendWelcomeEmailForUser = async ({ name, email }) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Boost</title>
+    <title>Welcome to Learn Boost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-heading {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .welcome-message {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        #name {
+            font-weight: bold;
+            color: #0088cc; /* You can change this color to your preference */
+        }
+    </style>
 </head>
 <body>
-    <p>Hi ${name}, welcome to Learn Boost</p>
+    <div class="container">
+        <h1 class="welcome-heading">Welcome to Learn Boost</h1>
+        <p class="welcome-message">Hello <span id="name">${name}</span>, we're excited to have you here!</p>
+    </div>
+
 </body>
-</html>`;
+</html>
+`;
 
   try {
     const emailArgs = createEmailParam(null, email, 'Welcome', message);
@@ -201,12 +300,52 @@ module.exports.sendWelcomeEmailForMarketer = async ({ name, email }) => {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Boost</title>
+    <title>Welcome to Learn Boost</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-heading {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .welcome-message {
+            font-size: 18px;
+            color: #555;
+            margin-top: 10px;
+        }
+
+        #name {
+            font-weight: bold;
+            color: #0088cc; /* You can change this color to your preference */
+        }
+    </style>
 </head>
 <body>
-    <p>Hi ${name}, welcome to Learn Boost</p>
+    <div class="container">
+        <h1 class="welcome-heading">Welcome to Learn Boost</h1>
+        <p class="welcome-message">Hello <span id="name">${name}</span>, we're excited to have you here!</p>
+    </div>
+
 </body>
-</html>`;
+</html>
+`;
 
   try {
     const emailArgs = createEmailParam(null, email, 'Welcome', message);
