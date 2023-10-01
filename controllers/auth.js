@@ -161,25 +161,16 @@ module.exports.sendResetPasswordCode = asyncHandler(async (req, res, next) => {
 
 module.exports.verifyResetPasswordCode = asyncHandler(
   async (req, res, next) => {
-    const args = req.body;
-    const { accountType } = args;
+    const token = req.body.token;
     // validate arguments
-    const model = accountType === 'company' ? Company : User;
-    const encryptedToken = getEncryptedToken(args.token);
+    const encryptedToken = getEncryptedToken(token);
 
-    const user = await model.findOne({
+    const user = await User.findOne({
       resetPasswordToken: encryptedToken,
     });
 
-    console.log(user);
-
     if (!user) {
-      return next(
-        new ErrorResponse(404, {
-          messageEn: 'Invalid token',
-          messageGe: 'Ungültiges Token',
-        })
-      );
+      return next(new ErrorResponse(404, 'Invalid token'));
     }
 
     if (new Date(user.resetPasswordTokenExpiry) < new Date()) {
@@ -187,49 +178,30 @@ module.exports.verifyResetPasswordCode = asyncHandler(
       user.resetPasswordCode = undefined;
       user.resetPasswordTokenExpiry = undefined;
       await user.save();
-      return next(
-        new ErrorResponse(400, {
-          messageEn: 'Reset password session expired',
-          messageGe:
-            'Die Sitzung zum Zurücksetzen des Passworts ist abgelaufen',
-        })
-      );
+      return next(new ErrorResponse(400, 'Reset password session expired'));
     }
 
-    if (user.resetPasswordCode !== args.code) {
-      return next(
-        new ErrorResponse(400, {
-          messageEn: 'Incorrect code',
-          messageGe: 'Falscher Code',
-        })
-      );
+    if (user.resetPasswordCode !== req.body.code) {
+      return next(new ErrorResponse(400, 'Incorrect code'));
     }
 
     res.status(200).json({
       success: true,
-      token: args.token,
+      token: token,
     });
   }
 );
 
 module.exports.resetPassword = asyncHandler(async (req, res, next) => {
-  const args = req.body;
-  const { accountType } = args;
   // validate arguments
-  const model = accountType === 'company' ? Company : User;
-  const encryptedToken = getEncryptedToken(args.token);
+  const encryptedToken = getEncryptedToken(req.body.token);
 
-  const user = await model.findOne({
+  const user = await User.findOne({
     resetPasswordToken: encryptedToken,
   });
 
   if (!user) {
-    return next(
-      new ErrorResponse(404, {
-        messageEn: 'Invalid token',
-        messageGe: 'Ungültiges Token',
-      })
-    );
+    return next(new ErrorResponse(404, 'Invalid token'));
   }
 
   if (new Date(user.resetPasswordTokenExpiry) < new Date()) {
@@ -237,15 +209,10 @@ module.exports.resetPassword = asyncHandler(async (req, res, next) => {
     user.resetPasswordCode = undefined;
     user.resetPasswordTokenExpiry = undefined;
     await user.save();
-    return next(
-      new ErrorResponse(400, {
-        messageEn: 'Reset password session expired',
-        messageGe: 'Die Sitzung zum Zurücksetzen des Passworts ist abgelaufen',
-      })
-    );
+    return next(new ErrorResponse(400, 'Reset password session expired'));
   }
 
-  user.password = await generateEncryptedPassword(args.password);
+  user.password = await generateEncryptedPassword(req.body.password);
   user.resetPasswordToken = undefined;
   user.resetPasswordCode = undefined;
   user.resetPasswordTokenExpiry = undefined;
