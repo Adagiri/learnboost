@@ -60,7 +60,7 @@ module.exports.initialiseTransaction = async (
     return response.data.data;
   } catch (error) {
     console.log('Error Occured Whilst Initiating Transaction: ', error);
-    throw error.response.data;
+    throw error.response?.data;
   }
 };
 
@@ -127,7 +127,7 @@ module.exports.disburseSingle = async (amount, reason, recipient) => {
   } catch (error) {
     console.log('Error Occured During Disbursement: ', error);
 
-    const err = error.response.data.message;
+    const err = error.response?.data.message;
 
     if (err === 'Your balance is not enough to fulfil this request') {
       await sendErrorToDeveloper({
@@ -137,7 +137,7 @@ module.exports.disburseSingle = async (amount, reason, recipient) => {
 
       throw new Error('Please retry in 30 minutes');
     }
-    throw error.response.data;
+    throw error.response?.data;
   }
 };
 
@@ -159,7 +159,29 @@ module.exports.getBanks = async () => {
   } catch (error) {
     console.log('Error Occured Whilst Fetching Banks: ', error);
 
-    throw error.response.data;
+    throw error.response?.data;
+  }
+};
+
+module.exports.getTransferBalance = async () => {
+  try {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = process.env.PAYSTACK_BASE_URL;
+
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
+
+    const response = await axios.get(baseUrl + '/balance', {
+      headers,
+    });
+
+    return response.data.data[0].balance;
+  } catch (error) {
+    console.log('Error Occured Whilst Fetching Banks: ', error);
+
+    throw error.response?.data;
   }
 };
 

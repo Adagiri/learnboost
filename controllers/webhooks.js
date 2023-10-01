@@ -48,6 +48,7 @@ module.exports.processSubscriptionTransaction = async ({
     const subscriptionTransactionId = new mongoose.Types.ObjectId();
     const subscriptionTransactionArgs = {
       _id: subscriptionTransactionId,
+      amount: transactionAmount,
       paymentMethod: channel === 'bank_transfer' ? BANK_TRANSFER : CARD,
       reference: reference,
       user: userId,

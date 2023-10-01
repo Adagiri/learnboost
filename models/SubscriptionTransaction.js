@@ -7,6 +7,11 @@ const SubscriptionTransactionSchema = new mongoose.Schema({
     required: true,
   },
 
+  amount: {
+    type: Number,
+    required: true,
+  },
+
   reference: {
     type: String,
     required: true,

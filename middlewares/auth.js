@@ -119,6 +119,7 @@ module.exports.protect = asyncHandler(async (req, res, next) => {
     token = req.cookies.token;
   }
 
+
   if (!token) {
     return next(new ErrorResponse(401, 'Please log in to continue'));
   }
