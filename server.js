@@ -35,7 +35,7 @@ connectDB();
 const app = express();
 
 let origin = [
-  'https://marketer.learnboost.com.ng',
+  'https://marketers.learnboost.com.ng',
   'https://admin-sandbox.learnboost.com.ng',
   'https://admin.learnboost.com.ng',
 ];
