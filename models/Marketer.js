@@ -41,7 +41,7 @@ const MarketerSchema = new mongoose.Schema({
   approvalStatus: {
     type: String,
     default: 'pending',
-    enum: ["accepted", "rejected", "pending"]
+    enum: ["approved", "rejected", "pending"]
   },
 
   referralCode: {

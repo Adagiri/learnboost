@@ -63,8 +63,7 @@ module.exports.sendAccountActivationEmailForUser = async ({
 
 module.exports.sendAccountActivationEmailForMarketer = async ({
   email,
-  name,
-  code,
+  token,
 }) => {
   const message = `<!DOCTYPE html>
 <html lang="en">
@@ -72,37 +71,54 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Boost</title>
+    <title>Email Verification - Learn Boost</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f7f7f7;
+            background-color: #f5f5f5;
             color: #333;
+            padding: 20px;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
             background-color: #fff;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .message {
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-        .code {
+        h1 {
             font-size: 24px;
-            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #555;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .reset-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .reset-link:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="message">Hi ${name}, please use the code below to activate your account:</div>
-        <div class="code">${code}</div>
+        <h1>Verify your email</h1>
+        <p>Hello there,</p>
+        <p>Please click the link below to verify your email</p>
+        <p><a class="reset-link" style="color:#fff" href="${process.env.CLIENT_ADDRESS}/verify-email/${token}">Verify Email</a></p>
+        <p>This link will expire in 10 minutes for security reasons.</p>
+    
     </div>
 </body>
 </html>
@@ -207,7 +223,7 @@ module.exports.sendResetPasswordEmailForMarketer = async (email, token) => {
         <h1>Reset Your Password</h1>
         <p>Hello there,</p>
         <p>You recently requested to reset your password for your Learn Boost account. Click the link below to reset it. If you didn't make this request, you can ignore this email.</p>
-        <p><a class="reset-link" href="https://marketers.learnbooost.com.ng/reset-password/${token}">Reset My Password</a></p>
+        <p><a class="reset-link" style="color:#fff" href="${process.env.CLIENT_ADDRESS}/reset-password/${token}">Reset My Password</a></p>
         <p>This link will expire in 10 minutes for security reasons.</p>
         <p>If you have any questions, feel free to <a href="mailto:support@learnbooost.com.ng">contact us</a>.</p>
         <p>Thank you, <br> The Learn Boost Team</p>
@@ -341,6 +357,7 @@ module.exports.sendWelcomeEmailForMarketer = async ({ name, email }) => {
     <div class="container">
         <h1 class="welcome-heading">Welcome to Learn Boost</h1>
         <p class="welcome-message">Hello <span id="name">${name}</span>, we're excited to have you here!</p>
+        <p class="welcome-message">Please note that your account will soon be approved. Only then will you be able to log into your dashboard</p>
     </div>
 
 </body>

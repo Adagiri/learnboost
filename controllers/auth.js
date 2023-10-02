@@ -8,6 +8,7 @@ const {
   sendResetPasswordEmailForUser,
   sendAccountActivationEmailForMarketer,
   sendResetPasswordEmailForMarketer,
+  sendWelcomeEmailForMarketer,
 } = require('../utils/messages');
 
 const {
@@ -328,19 +329,18 @@ module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(400, 'Email already taken'));
   }
 
-  const { token, encryptedToken, tokenExpiry, code } = generateVerificationCode(
+  const { token, encryptedToken, tokenExpiry } = generateVerificationCode(
     20,
     10
   );
   args.password = await generateEncryptedPassword(args.password);
-  args.accountActivationCode = code;
   args.accountActivationToken = encryptedToken;
   args.accountActivationTokenExpiry = tokenExpiry;
   args.referralCode = generateRandomString(7);
 
   await Marketer.create(args);
 
-  await sendAccountActivationEmailForMarketer({ email, name, code });
+  await sendAccountActivationEmailForMarketer({ email, token });
 
   return res.status(200).json({
     success: true,
@@ -355,7 +355,7 @@ module.exports.verifyEmailForMarketer = asyncHandler(async (req, res, next) => {
 
   const marketer = await Marketer.findOne({
     accountActivationToken: encryptedToken,
-    isAccountActivated: false,
+    isEmailVerified: false,
   });
 
   if (!marketer) {
@@ -364,25 +364,19 @@ module.exports.verifyEmailForMarketer = asyncHandler(async (req, res, next) => {
 
   if (new Date(marketer.accountActivationTokenExpiry) < new Date()) {
     marketer.accountActivationToken = undefined;
-    marketer.accountActivationCode = undefined;
     marketer.accountActivationTokenExpiry = undefined;
     await marketer.save();
     return next(new ErrorResponse(400, 'Registration session expired'));
   }
 
-  if (marketer.accountActivationCode !== args.code) {
-    return next(new ErrorResponse(400, 'Incorrect code'));
-  }
-
   marketer.isEmailVerified = true;
   marketer.accountActivationToken = undefined;
-  marketer.accountActivationCode = undefined;
   marketer.accountActivationTokenExpiry = undefined;
   await marketer.save();
 
   const { email, name } = marketer;
 
-  await sendWelcomeEmailForUser({ email, name });
+  await sendWelcomeEmailForMarketer({ email, name });
   const authToken = getSignedJwtToken(marketer);
 
   res.status(200).json({
@@ -397,7 +391,7 @@ module.exports.loginMarketer = asyncHandler(async (req, res, next) => {
 
   let marketer = await Marketer.findOne({
     email: args.email,
-    isAccountActivated: true,
+    isEmailVerified: true,
   }).select('+password');
 
   if (!marketer) {
@@ -432,7 +426,7 @@ module.exports.forgotPasswordMarketer = asyncHandler(async (req, res, next) => {
   const email = req.body.email;
   const marketer = await Marketer.findOne({
     email: email,
-    isAccountActivated: true,
+    isEmailVerified: true,
     isAccountApproved: true,
   });
 
