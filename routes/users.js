@@ -6,11 +6,11 @@ const {
   updateUser,
   getLoggedInUser,
 } = require('../controllers/users.js');
-const { protectUser, protectAdmin } = require('../middlewares/auth.js');
+const { protectUser,  protect } = require('../middlewares/auth.js');
 const router = express.Router();
 
-router.route('/').get(protectAdmin, getUsers).put(protectUser, updateUser);
+router.route('/').get(protect, getUsers).put(protectUser, updateUser);
 router.get('/logged-in', protectUser, getLoggedInUser);
-router.route('/:userId').get(protectAdmin, getUser);
+router.route('/:userId').get(protect, getUser);
 
 module.exports = router;

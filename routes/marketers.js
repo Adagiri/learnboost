@@ -9,12 +9,14 @@ const {
   getWithdrawals,
   getWithdrawalById,
   editMarketer,
+  getDashboardData,
 } = require('../controllers/marketers.js');
 const { protect, protectAdmin } = require('../middlewares/auth.js');
 const router = express.Router();
 
 router.route('/').get(protect, getMarketers).put(protect, updateMarketer);
 router.get('/earnings', protect, getEarnings);
+router.get('/dashboard-data', protect, getDashboardData);
 router.route('/earnings/:earningId').get(protect, getEarningById);
 router.get('/withdrawals', protect, getWithdrawals);
 router.route('/withdrawals/:withdrawalId').get(protect, getWithdrawalById);

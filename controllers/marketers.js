@@ -155,3 +155,28 @@ module.exports.editMarketer = asyncHandler(async (req, res, next) => {
   marketer.id = marketer._id;
   return res.status(200).json(marketer);
 });
+
+module.exports.getDashboardData = asyncHandler(async (req, res, next) => {
+  const marketer = await Marketer.findById(req.user.id);
+  const walletBalance = marketer.walletBalance;
+
+  const earnings = await Earning.find({ marketer: marketer._id });
+  const amountEarned = earnings.reduce(
+    (accumulator, currentValue) => accumulator + currentValue.amountEarned,
+    0
+  );
+
+  const amountWithdrawed = earnings
+    .filter((earning) => earning.status === 'withdrawn')
+    .reduce(
+      (accumulator, currentValue) => accumulator + currentValue.amountEarned,
+      0
+    );
+
+  const data = {
+    walletBalance,
+    amountEarned,
+    amountWithdrawed,
+  };
+  return res.status(200).json({ data });
+});
