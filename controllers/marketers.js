@@ -4,6 +4,7 @@ const Withdrawal = require('../models/Withdrawal');
 const Earning = require('../models/Earning');
 const ErrorResponse = require('../utils/errorResponse');
 const { getQueryArgs } = require('../utils/general');
+const { sendNotificationEmailToAUser } = require('../utils/messages');
 
 module.exports.getMarketers = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
@@ -143,6 +144,10 @@ module.exports.editMarketer = asyncHandler(async (req, res, next) => {
     req.body.isAccountApproved = true;
   }
 
+  if (req.body.approvalStatus === 'rejected') {
+    req.body.isEmailVerified = false;
+  }
+
   let marketer = await Marketer.findByIdAndUpdate(
     req.params.marketerId,
     req.body,
@@ -150,6 +155,23 @@ module.exports.editMarketer = asyncHandler(async (req, res, next) => {
       new: true,
     }
   );
+
+  if (req.body.approvalStatus === 'approved') {
+    await sendNotificationEmailToAUser({
+      email: marketer.email,
+      subject: 'Account Approval',
+      content:
+        'Your account has been approved. You can now log into your dashboard.',
+    });
+  }
+
+  if (req.body.approvalStatus === 'rejected') {
+    await sendNotificationEmailToAUser({
+      email: marketer.email,
+      subject: 'Account Rejection',
+      content: 'Your account was rejected.',
+    });
+  }
 
   marketer = marketer.toObject();
   marketer.id = marketer._id;
@@ -166,7 +188,7 @@ module.exports.getDashboardData = asyncHandler(async (req, res, next) => {
     0
   );
 
-  const amountWithdrawed = earnings
+  const amountWithdrawn = earnings
     .filter((earning) => earning.status === 'withdrawn')
     .reduce(
       (accumulator, currentValue) => accumulator + currentValue.amountEarned,
@@ -176,7 +198,7 @@ module.exports.getDashboardData = asyncHandler(async (req, res, next) => {
   const data = {
     walletBalance,
     amountEarned,
-    amountWithdrawed,
+    amountWithdrawn,
   };
   return res.status(200).json({ data });
 });

@@ -185,6 +185,33 @@ module.exports.getTransferBalance = async () => {
   }
 };
 
+module.exports.getAccountDetail = async ({ account_number, bank_code }) => {
+  try {
+    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const baseUrl = process.env.PAYSTACK_BASE_URL;
+
+    const headers = {
+      Authorization: 'Bearer ' + secretKey,
+      'Content-Type': 'application/json',
+    };
+
+    const response = await axios.get(
+      baseUrl +
+        `/bank/resolve?account_number=${account_number}&bank_code=${bank_code}`,
+      {
+        headers,
+      }
+    );
+
+    return response.data.data
+  } catch (error) {
+    console.log('Error Occured Whilst Account Details: ', error);
+
+    throw error.response?.data;
+  }
+};
+// bank/resolve?account_number=0001234567&bank_code=058
+
 module.exports.handleWebhook = async (payload) => {
   let { event, data } = payload;
 

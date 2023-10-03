@@ -103,7 +103,22 @@ module.exports.withdrawEarning = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.getBanks = asyncHandler(async (req, res, next) => {
-  const banks = await PaystackService.getBanks();
+  let banks = await PaystackService.getBanks();
 
+  banks = banks.map((bank) => {
+    return {
+      name: bank.name,
+      code: bank.code,
+    };
+  });
   return res.status(200).json({ banks });
+});
+
+module.exports.getAccountDetail = asyncHandler(async (req, res, next) => {
+  let accountDetail = await PaystackService.getAccountDetail({
+    account_number: req.query.account_number,
+    bank_code: req.query.bank_code,
+  });
+
+  return res.status(200).json({ accountDetail });
 });
