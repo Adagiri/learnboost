@@ -47,6 +47,8 @@ const getSkip = (start) => {
 
 module.exports.getQueryArgs = (args) => {
   const filter = args || {};
+
+  console.log(filter);
   // Transform the query if the property 'id' was added
   if (filter.id) {
     console.log(typeof filter.id);
@@ -60,6 +62,15 @@ module.exports.getQueryArgs = (args) => {
   if (filter.ids) {
     filter._id = { $in: filter.ids.map((id) => mongoose.Types.ObjectId(id)) };
     delete filter.ids;
+  }
+
+  if (filter.q) {
+    filter.$or = [
+      { name: { $regex: filter.q, $options: 'i' } }, // Case-insensitive search
+      { email: { $regex: filter.q, $options: 'i' } },
+      { referralCode: { $regex: filter.q, $options: 'i' } },
+      // Add more fields as needed
+    ];
   }
 
   // Make sure deleted documents are not selected
@@ -141,7 +152,7 @@ module.exports.generateEncryptedPassword = async (password) => {
 
 module.exports.calculatePaystackTransactionCharge = async (amount) => {
   try {
-    // const generalInfos = await 
+    // const generalInfos = await
   } catch (error) {
     throw error;
   }

@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const WithdrawalSchema = new mongoose.Schema({
+  marketer: {
+    type: mongoose.Types.ObjectId,
+    ref: 'Marketer',
+    required: true,
+  },
+  
   amount: {
     type: String,
     trim: true,

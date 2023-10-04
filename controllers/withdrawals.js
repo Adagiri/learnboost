@@ -5,7 +5,7 @@ const { getQueryArgs } = require('../utils/general');
 
 module.exports.getWithdrawals = asyncHandler(async (req, res, next) => {
   const { filter, sort, skip, limit } = getQueryArgs(req.query);
-
+  console.log(req.user);
   if (req.user.accountType === 'Marketer') {
     filter.marketer = req.user.id;
   }

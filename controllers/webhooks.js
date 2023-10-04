@@ -159,6 +159,7 @@ module.exports.processDisbursement = async ({
 
       // save withdrawal transactions
       const withdrawalTransaction = new Withdrawal({
+        marketer: marketerId,
         amount: transactionAmount,
         reference: reference,
         paymentHandler: 'Paystack',
