@@ -42,6 +42,8 @@ module.exports.processSubscriptionTransaction = async ({
     user.subscriptionEndDate =
       subscriptionType === '6_months'
         ? addMonths(currentDate, 6)
+        : subscriptionType === '3_months'
+        ? addMonths(currentDate, 3)
         : addYears(currentDate, 1);
 
     // Create a new subscription transaction ID

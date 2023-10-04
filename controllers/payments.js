@@ -5,6 +5,11 @@ const { initialiseTransaction } = require('../services/PaystackService');
 const ErrorResponse = require('../utils/errorResponse');
 const PaystackService = require('../services/PaystackService');
 const PendingWithdrawal = require('../models/PendingWithdrawal');
+const {
+  THREE_MONTHS_PRICE,
+  SIX_MONTHS_PRICE,
+  ONE_YEAR_PRICE,
+} = require('../utils/constants');
 
 module.exports.initiateTransactionForSubscription = asyncHandler(
   async (req, res, next) => {
@@ -25,8 +30,14 @@ module.exports.initiateTransactionForSubscription = asyncHandler(
     // }
 
     console.log('ran');
+
     const subscriptionType = req.query.sub_type;
-    const amount = subscriptionType === '6_months' ? 1250 : 5250;
+    const amount =
+      subscriptionType === '6_months'
+        ? SIX_MONTHS_PRICE
+        : subscriptionType === '3_months'
+        ? THREE_MONTHS_PRICE
+        : ONE_YEAR_PRICE;
     const email = req.user.email;
     const channels = ['card', 'bank_transfer'];
 
