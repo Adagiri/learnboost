@@ -6,6 +6,18 @@ const MarketerSchema = new mongoose.Schema({
     trim: true,
     required: true,
   },
+  totalEarnings: {
+    type: Number,
+    default: 0,
+  },
+  referralSignupsCount: {
+    type: Number,
+    default: 0,
+  },
+  referralSubscriptionCounts: {
+    type: Number,
+    default: 0,
+  },
 
   accountType: {
     type: String,
@@ -41,7 +53,7 @@ const MarketerSchema = new mongoose.Schema({
   approvalStatus: {
     type: String,
     default: 'pending',
-    enum: ["approved", "rejected", "pending"]
+    enum: ['approved', 'rejected', 'pending'],
   },
 
   referralCode: {

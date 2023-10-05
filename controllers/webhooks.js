@@ -68,7 +68,7 @@ module.exports.processSubscriptionTransaction = async ({
     const referralCode = user.referralCode;
     let marketer = null;
     let earningPercentage = null;
-    let marketingEarningRecordArgs = null;
+    let earningRecordArgs = null;
 
     if (user.referralCode) {
       // Find the marketer based on the referral code
@@ -85,9 +85,11 @@ module.exports.processSubscriptionTransaction = async ({
 
       // Update the wallet balance of the marketer who owns the referral code
       marketer.walletBalance = marketer.walletBalance + marketingAmountEarned;
+      marketer.totalEarnings = marketer.totalEarnings + marketingAmountEarned;
+      marketer.referralSubscriptionCounts = marketer.referralSubscriptionCounts + 1
 
       // Create marketing earning record arguments
-      marketingEarningRecordArgs = {
+      earningRecordArgs = {
         user: userId,
         marketer: marketer._id,
         subscriptionTransaction: subscriptionTransactionId,
@@ -111,7 +113,7 @@ module.exports.processSubscriptionTransaction = async ({
         await marketer.save({ session });
 
         // Create Marketing Earning Record
-        await Earning.create([marketingEarningRecordArgs], {
+        await Earning.create([earningRecordArgs], {
           session,
         });
       }

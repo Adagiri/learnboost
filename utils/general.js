@@ -152,7 +152,6 @@ module.exports.generateEncryptedPassword = async (password) => {
 
 module.exports.calculatePaystackTransactionCharge = async (amount) => {
   try {
-    // const generalInfos = await
   } catch (error) {
     throw error;
   }

@@ -88,6 +88,12 @@ module.exports.verifyEmail = asyncHandler(async (req, res, next) => {
   user.accountActivationTokenExpiry = undefined;
   await user.save();
 
+  // Increase signup count for marketer
+  await Marketer.findOneAndUpdate(
+    { referralCode: user.referralCode },
+    { $inc: { referralSignupsCount: 1 } }
+  );
+
   const { email, name } = user;
 
   await sendWelcomeEmailForUser({ email, name });
