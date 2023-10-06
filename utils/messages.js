@@ -441,7 +441,7 @@ module.exports.sendNotificationEmailToAUser = async ({
 </head>
 <body>
   <div class="container">
-    <h1>Welcome to Learn Boost!</h1>
+    <h1>Important Notification</h1>
     <p>${content}</p>
     <p>If you have any questions or need assistance, please feel free to <a href="mailto:support@learnboost.com.ng">contact us</a>. We're here to help!</p>
     <p>Best regards, <br> The Learn Boost Team</p>

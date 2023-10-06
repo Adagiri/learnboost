@@ -210,13 +210,12 @@ module.exports.getAccountDetail = async ({ account_number, bank_code }) => {
     throw error.response?.data;
   }
 };
-// bank/resolve?account_number=0001234567&bank_code=058
 
 module.exports.handleWebhook = async (payload) => {
   let { event, data } = payload;
 
   console.log(event, 'event');
-  console.log(data, 'data');
+
 
   // Convert from kobo to naira (Amount from paystack is in -kobo-)
   const transactionAmount = Number(data.amount) / 100;
@@ -274,7 +273,7 @@ module.exports.handleWebhook = async (payload) => {
           'Important: Issue with Your Recent Withdrawal Transaction';
         await sendNotificationEmailToAUser({
           subject,
-          content: transferFailureContent(data.metadata?.marketerName),
+          content: transferFailureContent(metadata?.marketerName),
           email: metadata?.marketerEmail,
         });
       }

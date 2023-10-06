@@ -132,6 +132,8 @@ module.exports.verifyEmail = asyncHandler(async (req, res, next) => {
   await sendWelcomeEmailForUser({ email, name });
   const authToken = getSignedJwtToken(user);
 
+  await User.deleteMany({ email: email, isAccountActivated: false });
+
   res.status(200).json({
     success: true,
     authToken: authToken,
@@ -417,6 +419,8 @@ module.exports.verifyEmailForMarketer = asyncHandler(async (req, res, next) => {
 
   await sendWelcomeEmailForMarketer({ email, name });
   const authToken = getSignedJwtToken(marketer);
+
+  await Marketer.deleteMany({ email: email, isEmailVerified: false });
 
   res.status(200).json({
     success: true,
