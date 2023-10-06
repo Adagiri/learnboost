@@ -137,6 +137,7 @@ module.exports.processDisbursement = async ({
   reference,
   transactionAmount,
   transactionDate,
+  accountDetails
 }) => {
   // Start a Mongoose session to handle transactions
   const session = await mongoose.startSession();

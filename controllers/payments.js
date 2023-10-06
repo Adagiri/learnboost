@@ -82,6 +82,10 @@ module.exports.withdrawEarning = asyncHandler(async (req, res, next) => {
     );
   }
 
+  if (marketer.walletBalance < 0) {
+    return next(new ErrorResponse(400, 'You do not have money in your wallet'));
+  }
+
   const account_number = req.body.account_number;
   const bank_code = req.body.bank_code;
   const name = marketer.name;
@@ -97,8 +101,6 @@ module.exports.withdrawEarning = asyncHandler(async (req, res, next) => {
     bank_code,
     metadata
   );
-
-  console.log(recipient);
 
   // Make transfer
   const reason = 'Marketer_Withdraw_Earnings';

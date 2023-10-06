@@ -203,7 +203,7 @@ module.exports.getAccountDetail = async ({ account_number, bank_code }) => {
       }
     );
 
-    return response.data.data
+    return response.data.data;
   } catch (error) {
     console.log('Error Occured Whilst Account Details: ', error);
 
@@ -216,6 +216,7 @@ module.exports.handleWebhook = async (payload) => {
   let { event, data } = payload;
 
   console.log(event, 'event');
+  console.log(data, 'data');
 
   // Convert from kobo to naira (Amount from paystack is in -kobo-)
   const transactionAmount = Number(data.amount) / 100;
@@ -253,24 +254,28 @@ module.exports.handleWebhook = async (payload) => {
   }
 
   if (event.startsWith('transfer')) {
+    const metadata = data.recipient.metadata;
     try {
       if (event === 'transfer.success') {
         await processDisbursement({
-          metadata: data.metadata,
+          metadata: metadata,
           reference: data.reference,
           transactionAmount: transactionAmount,
           transactionDate: data.created_at,
+          accountDetails: data.recipient.details,
         });
       }
 
       if (event === 'transfer.failed' || event === 'transfer.reversed') {
-        await PendingWithdrawal.deleteMany({ marketer: await data.metadata?.marketerId });
+        await PendingWithdrawal.deleteMany({
+          marketer: metadata?.marketerId,
+        });
         const subject =
           'Important: Issue with Your Recent Withdrawal Transaction';
         await sendNotificationEmailToAUser({
           subject,
           content: transferFailureContent(data.metadata?.marketerName),
-          email: data.metadata?.marketerEmail,
+          email: metadata?.marketerEmail,
         });
       }
     } catch (error) {
