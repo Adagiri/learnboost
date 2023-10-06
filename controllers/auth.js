@@ -56,6 +56,39 @@ module.exports.register = asyncHandler(async (req, res, next) => {
   });
 });
 
+module.exports.resendEmail = asyncHandler(async (req, res, next) => {
+  const args = req.body;
+  const { name, email } = args;
+
+  const existingAccount = await User.findOne({
+    email: email,
+    isAccountActivated: true,
+  });
+
+  if (existingAccount) {
+    return next(new ErrorResponse(400, 'Email already taken'));
+  }
+
+  const { token, encryptedToken, tokenExpiry, code } = generateVerificationCode(
+    20,
+    10
+  );
+
+  args.password = await generateEncryptedPassword(args.password);
+  args.accountActivationCode = code;
+  args.accountActivationToken = encryptedToken;
+  args.accountActivationTokenExpiry = tokenExpiry;
+
+  await User.create(args);
+
+  await sendAccountActivationEmailForUser({ email, name, code });
+
+  return res.status(200).json({
+    success: true,
+    token,
+  });
+});
+
 module.exports.verifyEmail = asyncHandler(async (req, res, next) => {
   const args = req.body;
 

@@ -6,6 +6,7 @@ const {
   register,
   verifyEmail,
   login,
+  resendEmail,
   deleteAccount,
   resetPassword,
   loginAdmin,
@@ -28,6 +29,7 @@ router.post('/marketers/forgot-password', forgotPasswordMarketer);
 router.post('/marketers/reset-password', resetPasswordMarketer);
 
 router.post('/register', register);
+router.post('/resend-email', resendEmail);
 router.post('/verify-email', verifyEmail);
 router.post('/login', login);
 router.post('/reset-password/send-code', sendResetPasswordCode);

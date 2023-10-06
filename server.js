@@ -20,6 +20,7 @@ const admins = require('./routes/admins');
 const misc = require('./routes/misc');
 const earnings = require('./routes/earnings');
 const subscriptions = require('./routes/subscriptions');
+const companyData = require('./routes/companiesData')
 const withdrawals = require('./routes/withdrawals');
 const { createWebhookHash } = require('./utils/misc');
 const { handleWebhook } = require('./services/PaystackService');
@@ -106,6 +107,7 @@ app.use('/api/v1/misc', misc);
 app.use('/api/v1/withdrawals', withdrawals);
 app.use('/api/v1/earnings', earnings);
 app.use('/api/v1/subscriptions', subscriptions);
+app.use('/api/v1/company-data', companyData);
 
 app.use(errorHandler);
 
