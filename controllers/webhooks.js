@@ -35,6 +35,7 @@ module.exports.processSubscriptionTransaction = async ({
     // Get the current date
     const currentDate = new Date();
     const subscriptionType = metadata.subscriptionType;
+    const firstTimeSubscribing = user.latestSubscriptionType === 'none';
 
     // Update user data with subscription information
     user.latestSubscriptionType = subscriptionType;
@@ -86,7 +87,11 @@ module.exports.processSubscriptionTransaction = async ({
       // Update the wallet balance of the marketer who owns the referral code
       marketer.walletBalance = marketer.walletBalance + marketingAmountEarned;
       marketer.totalEarnings = marketer.totalEarnings + marketingAmountEarned;
-      marketer.referralSubscriptionCounts = marketer.referralSubscriptionCounts + 1
+
+      if (firstTimeSubscribing) {
+        marketer.referralSubscriptionCounts =
+          marketer.referralSubscriptionCounts + 1;
+      }
 
       // Create marketing earning record arguments
       earningRecordArgs = {
@@ -137,7 +142,7 @@ module.exports.processDisbursement = async ({
   reference,
   transactionAmount,
   transactionDate,
-  accountDetails
+  accountDetails,
 }) => {
   // Start a Mongoose session to handle transactions
   const session = await mongoose.startSession();
