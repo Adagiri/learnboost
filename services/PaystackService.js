@@ -264,9 +264,9 @@ module.exports.handleWebhook = async (payload) => {
       }
 
       if (event === 'transfer.failed' || event === 'transfer.reversed') {
-        await PendingWithdrawal.deleteMany({ marketer: await PendingWithdraw });
+        await PendingWithdrawal.deleteMany({ marketer: await data.metadata?.marketerId });
         const subject =
-          'Important: Issue with Your Recent Withdrawal Transactiond';
+          'Important: Issue with Your Recent Withdrawal Transaction';
         await sendNotificationEmailToAUser({
           subject,
           content: transferFailureContent(data.metadata?.marketerName),
