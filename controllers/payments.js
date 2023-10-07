@@ -82,7 +82,7 @@ module.exports.withdrawEarning = asyncHandler(async (req, res, next) => {
     );
   }
 
-  if (marketer.walletBalance < 0) {
+  if (marketer.walletBalance <= 0) {
     return next(new ErrorResponse(400, 'You do not have money in your wallet'));
   }
 
