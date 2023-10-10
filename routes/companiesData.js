@@ -16,7 +16,7 @@ router.route('/').get(protect, getCompanyDatas);
 
 router
   .route('/:companyDataId')
-  .get(protect, getCompanyData)
+  .get(protectAdmin, getCompanyData)
   .put(protectAdmin, authorize('Master', 'Moderator'), editCompanyData);
 
 module.exports = router;

@@ -119,7 +119,6 @@ module.exports.protect = asyncHandler(async (req, res, next) => {
     token = req.cookies.token;
   }
 
-
   if (!token) {
     return next(new ErrorResponse(401, 'Please log in to continue'));
   }
@@ -128,6 +127,8 @@ module.exports.protect = asyncHandler(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     const accountType = decoded.accountType;
+
+    console.log(decoded, 'decoded');
 
     if (accountType === 'Admin') {
       req.user = await Admin.findById(decoded.id).select(
@@ -156,7 +157,7 @@ module.exports.protect = asyncHandler(async (req, res, next) => {
     next();
   } catch (err) {
     console.log(err);
-    return next(new ErrorResponse(500, 'Network error'));
+    return next(new ErrorResponse(401, 'Please log in to continue'));
   }
 });
 

@@ -11,7 +11,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(getCategories)
+  .get(protect, getCategories)
   // .post(protectAdmin, authorize('Master', 'Moderator'), addCategory);
 
 router

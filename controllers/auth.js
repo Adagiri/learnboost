@@ -338,11 +338,13 @@ module.exports.loginAdmin = asyncHandler(async (req, res, next) => {
   const token = getSignedJwtToken(admin);
 
   const options = {
-    // Expires in 24 hours
-    expires: new Date(Date.now() + 3600 * 24 * 1000),
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRY_IN_SECS * 1000
+    ),
     httpOnly: true,
     secure: true,
     path: '/',
+    sameSite: 'None', // Set SameSite attribute to None
   };
 
   admin = admin.toObject();
@@ -359,7 +361,7 @@ module.exports.loginAdmin = asyncHandler(async (req, res, next) => {
 
 module.exports.registerMarketer = asyncHandler(async (req, res, next) => {
   const args = req.body;
-  const { name, email } = args;
+  const { email } = args;
 
   const existingAccount = await Marketer.findOne({
     email: email,

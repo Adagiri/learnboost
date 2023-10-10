@@ -12,7 +12,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .get(getAdmins)
+  .get(protectAdmin, authorize('Master'), getAdmins)
   .post(protectAdmin, authorize('Master'), registerAdmin);
 
 router
