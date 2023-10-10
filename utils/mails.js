@@ -1,56 +1,46 @@
-const { messaging } = require('firebase-admin');
-const { default: axios } = require('axios');
+const AWS = require('aws-sdk');
 
 const createEmailParam = (from, to, subject, message) => {
-  const emails = typeof to === 'string' ? [to] : to;
-  var payload = {};
+  const mainEmail = process.env.MAIN_EMAIL;
+  if (!from) {
+    from = `Learnboost <${mainEmail}>`;
+  }
 
-  payload.sender = {
-    name: 'Learnboost',
-    email: 'hello@learnboost.com.ng',
-  };
-
-  payload.replyTo = {
-    name: 'Learnboost',
-    email: 'no-reply@learnboost.com.ng',
-  };
-
-  payload.subject = subject;
-  payload.htmlContent = message;
-
-  payload.messageVersions = emails.map((email) => {
-    return {
-      to: [
-        {
-          email: email,
+  return {
+    Destination: {
+      ToAddresses: typeof to === 'string' ? [to] : to,
+    },
+    Message: {
+      Body: {
+        Html: {
+          Charset: 'UTF-8',
+          Data: message,
         },
-      ],
-      htmlContent: message,
-      subject: subject,
-    };
-  });
-
-  return payload;
+      },
+      Subject: {
+        Charset: 'UTF-8',
+        Data: subject,
+      },
+    },
+    Source: from,
+    ReplyToAddresses: ['no-reply@learnboost.com.ng'],
+  };
 };
 
-const sendEmail = async (payload) => {
-  const BREVO_API_KEY = process.env.BREVO_API_KEY;
-
-  const headers = {
-    'api-key': BREVO_API_KEY,
-    'content-type': 'application/json',
-    accept: 'application/json',
-  };
-
+const sendEmail = async (params) => {
   try {
-    const resp = await axios.post(`https://api.brevo.com/v3/smtp/email`, payload, {
-      headers,
+    const credentials = {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.AWS_SECRET_KEY,
+    };
+    const ses = new AWS.SES({
+      credentials: credentials,
+      region: 'us-east-1',
     });
 
-    console.log(resp, 'resp')
+    await ses.sendEmail(params).promise();
   } catch (error) {
-    console.log(error, 'error occured whilst sending email with brevo');
-    throw error;
+    console.log('Error occured whilst sending email through SES', error);
   }
 };
 
