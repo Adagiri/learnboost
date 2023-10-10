@@ -118,7 +118,7 @@ module.exports.sendAccountActivationEmailForMarketer = async ({
         <p>Please click the link below to verify your email</p>
         <p><a class="reset-link" style="color:#fff" href="${process.env.CLIENT_ADDRESS}/verify-email/${token}">Verify Email</a></p>
         <p>This link will expire in 10 minutes for security reasons.</p>
-    
+       <p>If the button above does not work, you can also click <a href="${process.env.CLIENT_ADDRESS}/verify-email/${token}" target="_blank">here</a>.</p>
     </div>
 </body>
 </html>
@@ -224,6 +224,8 @@ module.exports.sendResetPasswordEmailForMarketer = async (email, token) => {
         <p>Hello there,</p>
         <p>You recently requested to reset your password for your Learn Boost account. Click the link below to reset it. If you didn't make this request, you can ignore this email.</p>
         <p><a class="reset-link" style="color:#fff" href="${process.env.CLIENT_ADDRESS}/reset-password/${token}">Reset My Password</a></p>
+
+         <p>If the button above does not work, you can also click <a href="${process.env.CLIENT_ADDRESS}/reset-password/${token}" target="_blank">here</a>.</p>
         <p>This link will expire in 10 minutes for security reasons.</p>
         <p>If you have any questions, feel free to <a href="mailto:support@learnbooost.com.ng">contact us</a>.</p>
         <p>Thank you, <br> The Learn Boost Team</p>
