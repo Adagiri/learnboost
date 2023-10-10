@@ -1,9 +1,8 @@
 const AWS = require('aws-sdk');
 
 const createEmailParam = (from, to, subject, message) => {
-  const mainEmail = process.env.MAIN_EMAIL;
   if (!from) {
-    from = `Learnboost <${mainEmail}>`;
+    from = `Learnboost <hello@learnboost.com.ng>`;
   }
 
   return {
